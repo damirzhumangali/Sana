@@ -13,4 +13,8 @@ data/
 *.mp4
 *.pt
 *.onnx
+.DS_Store
+*.jpg
+*.jpeg
+*.png
 

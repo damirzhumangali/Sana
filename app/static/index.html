@@ -100,7 +100,40 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .server-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    .status-dot.online {
+      background: #10b981;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+    }
+
+    .status-dot.offline {
+      background: #ef4444;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
     }
 
     .key-input-box {
@@ -119,6 +152,7 @@
       color: var(--amber);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      white-space: nowrap;
     }
 
     .key-input-box input {
@@ -128,7 +162,7 @@
       color: var(--text);
       font-family: var(--font-mono);
       font-size: 12px;
-      width: 220px;
+      width: 200px;
     }
 
     .api-badge {
@@ -141,6 +175,7 @@
       border-radius: 8px;
       text-decoration: none;
       transition: all 0.2s;
+      white-space: nowrap;
     }
 
     .api-badge:hover {
@@ -619,9 +654,17 @@
       </div>
     </div>
     <div class="header-actions">
+      <div class="server-status-pill" id="server-status-pill" title="Статус подключения к серверу Sana">
+        <span class="status-dot" id="server-status-dot"></span>
+        <span id="server-status-text">Проверка...</span>
+      </div>
+      <div class="key-input-box" id="url-input-box">
+        <label for="api-url-input">СЕРВЕР</label>
+        <input type="text" id="api-url-input" placeholder="http://127.0.0.1:8001" style="width: 175px;">
+      </div>
       <div class="key-input-box" id="key-input-box">
         <label for="api-key-input">API-КЛЮЧ</label>
-        <input type="password" id="api-key-input" value="FAbunyRSnJnCStOHtxykfBP_DdxFbnsy_Qfs5GB5Rd4" placeholder="Вставьте X-API-Key">
+        <input type="password" id="api-key-input" value="FAbunyRSnJnCStOHtxykfBP_DdxFbnsy_Qfs5GB5Rd4" placeholder="Вставьте X-API-Key" style="width: 140px;">
       </div>
       <a href="/docs" target="_blank" class="api-badge" id="swagger-link">Swagger /docs</a>
     </div>
@@ -716,13 +759,66 @@
     const modalImg = document.getElementById('modal-img');
     const modalCloseBtn = document.getElementById('modal-close-btn');
 
-    // Restore saved API key from localStorage
+    const apiUrlInput = document.getElementById('api-url-input');
+    const serverStatusDot = document.getElementById('server-status-dot');
+    const serverStatusText = document.getElementById('server-status-text');
+    const swaggerLink = document.getElementById('swagger-link');
+
+    // Restore saved API key and server URL
     if (localStorage.getItem('sana_api_key')) {
       apiKeyInput.value = localStorage.getItem('sana_api_key');
     }
     apiKeyInput.addEventListener('change', () => {
       localStorage.setItem('sana_api_key', apiKeyInput.value.trim());
     });
+
+    const savedApiUrl = localStorage.getItem('sana_api_url');
+    if (savedApiUrl) {
+      apiUrlInput.value = savedApiUrl;
+    } else if (window.location.protocol === 'file:' || !window.location.host) {
+      apiUrlInput.value = 'http://127.0.0.1:8001';
+    } else {
+      apiUrlInput.value = window.location.origin;
+    }
+
+    apiUrlInput.addEventListener('input', () => {
+      localStorage.setItem('sana_api_url', apiUrlInput.value.trim());
+      checkServerHealth();
+    });
+
+    function getApiBase() {
+      const val = (apiUrlInput.value || '').trim();
+      if (val) return val.replace(/\/+$/, '');
+      if (window.location.protocol === 'file:' || !window.location.host) {
+        return 'http://127.0.0.1:8001';
+      }
+      return '';
+    }
+
+    async function checkServerHealth() {
+      const base = getApiBase();
+      if (swaggerLink) {
+        swaggerLink.href = `${base || window.location.origin}/docs`;
+      }
+      try {
+        const res = await fetch(`${base}/health`, { signal: AbortSignal.timeout(2500) });
+        if (res.ok) {
+          serverStatusDot.className = 'status-dot online';
+          serverStatusText.innerText = 'Сервер онлайн';
+          serverStatusText.style.color = '#34d399';
+          return true;
+        }
+      } catch (e) {
+        // failed to reach server
+      }
+      serverStatusDot.className = 'status-dot offline';
+      serverStatusText.innerText = 'Сервер оффлайн';
+      serverStatusText.style.color = '#f87171';
+      return false;
+    }
+
+    checkServerHealth();
+    setInterval(checkServerHealth, 4000);
 
     btnSelect.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -769,6 +865,7 @@
         alert('Пожалуйста, укажите X-API-Key в верхнем поле!');
         return;
       }
+      const apiBase = getApiBase();
 
       // Reset previous results
       verdictBanner.style.display = 'none';
@@ -776,12 +873,13 @@
       statusPanel.style.display = 'block';
       statusText.innerText = `Загрузка видео «${file.name}»...`;
       progressBarFill.style.width = '20%';
+      progressBarFill.style.background = 'linear-gradient(90deg, #2563eb, #f59e0b)';
 
       const formData = new FormData();
       formData.append('file', file);
 
       try {
-        const uploadResp = await fetch('/api/v1/analyze', {
+        const uploadResp = await fetch(`${apiBase}/api/v1/analyze`, {
           method: 'POST',
           headers: {
             'X-API-Key': apiKey,
@@ -790,7 +888,7 @@
         });
 
         if (!uploadResp.ok) {
-          const err = await uploadResp.json();
+          const err = await uploadResp.json().catch(() => ({}));
           throw new Error(err.detail || `Ошибка загрузки: HTTP ${uploadResp.status}`);
         }
 
@@ -800,19 +898,24 @@
         progressBarFill.style.width = '45%';
         statusText.innerText = 'Видео принято. Фоновый AI-анализ (OpenCV + YOLOv8)...';
 
-        pollJobStatus(jobId, apiKey);
+        pollJobStatus(jobId, apiKey, apiBase);
       } catch (err) {
-        statusText.innerText = `Ошибка: ${err.message}`;
+        console.error('Upload / Analysis error:', err);
+        let msg = err.message || 'Ошибка сети';
+        if (msg === 'Failed to fetch' || err.name === 'TypeError') {
+          msg = `Сервер API недоступен (${apiBase || 'http://127.0.0.1:8001'}). Убедитесь, что запущен Uvicorn (порт 8001), или проверьте поле «СЕРВЕР» в шапке.`;
+        }
+        statusText.innerText = `Ошибка: ${msg}`;
         progressBarFill.style.background = '#ef4444';
       }
     }
 
-    async function pollJobStatus(jobId, apiKey) {
+    async function pollJobStatus(jobId, apiKey, apiBase) {
       let attempts = 0;
       const interval = setInterval(async () => {
         attempts++;
         try {
-          const res = await fetch(`/api/v1/jobs/${jobId}`, {
+          const res = await fetch(`${apiBase}/api/v1/jobs/${jobId}`, {
             headers: { 'X-API-Key': apiKey }
           });
 
@@ -838,7 +941,11 @@
           }
         } catch (err) {
           clearInterval(interval);
-          statusText.innerText = `Сбой анализа: ${err.message}`;
+          let msg = err.message || 'Сбой сети';
+          if (msg === 'Failed to fetch') {
+            msg = `Потеряна связь с сервером (${apiBase || 'http://127.0.0.1:8001'})`;
+          }
+          statusText.innerText = `Сбой анализа: ${msg}`;
           progressBarFill.style.background = '#ef4444';
         }
       }, 1000);
@@ -851,7 +958,7 @@
       if (job.verdict === 'no_violation') {
         verdictIcon.innerText = '✓';
         verdictTitle.innerText = 'Нарушение не обнаружено';
-        verdictDesc.innerText = 'Все операции в кассовом узле выполнены в строгом соответствии с нормами безопасности НБРК.';
+        verdictDesc.innerText = 'Настроенные правила не выявили признаков нарушений в проанализированном видео.';
         violationsContainer.innerHTML = '';
       } else {
         const count = job.violations.length;
@@ -879,9 +986,6 @@
                 </div>
                 <h3 class="violation-title">${escapeHtml(v.type)}</h3>
                 <p class="violation-desc">${escapeHtml(v.description)}</p>
-                <div class="violation-law">
-                  <strong>Нормативная база:</strong> Проверяемое правило соответствует требованиям НБРК к кассовым операциям банков второго уровня.
-                </div>
               </div>
               <div class="evidence-preview">
                 ${imgSrc ? `
