@@ -30,7 +30,7 @@ class Worker:
         self.work_dir.mkdir(parents=True, exist_ok=True)
 
     def run_once(self) -> bool:
-        self.jobs.expire_running()
+        self.jobs.expire_due()
         job = self.jobs.claim_next(self.timeout_seconds)
         if job is None:
             return False
@@ -105,7 +105,12 @@ def main() -> int:
         return 2
     storage = settings.storage_dir.resolve()
     storage.mkdir(parents=True, exist_ok=True)
-    jobs = JobRepository(storage / "jobs.sqlite3")
+    jobs = JobRepository(
+        storage / "jobs.sqlite3",
+        settings.total_job_timeout_seconds,
+        settings.max_active_jobs,
+        settings.max_running_jobs,
+    )
     jobs.initialize()
     worker = Worker(
         jobs,

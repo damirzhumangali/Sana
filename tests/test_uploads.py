@@ -112,7 +112,7 @@ def test_database_failure_removes_saved_file(client, settings, monkeypatch):
     def fail_insert(*args, **kwargs):
         raise sqlite3.OperationalError("simulated database failure")
 
-    monkeypatch.setattr(client.app.state.uploads.jobs, "create", fail_insert)
+    monkeypatch.setattr(client.app.state.uploads.jobs, "publish_upload", fail_insert)
     response = client.post(
         "/api/v1/analyze", headers=HEADERS, files={"file": ("video.mov", b"content")}
     )
