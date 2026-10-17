@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     api_key: SecretStr
     storage_dir: Path = Path("data")
     max_upload_mb: int = Field(default=100, ge=1)
+    max_request_mb: int | None = Field(default=None, ge=1)
     analyzer_callable: str | None = None
     job_timeout_seconds: int = Field(default=240, ge=1, le=300)
     total_job_timeout_seconds: int = Field(default=300, ge=1, le=300)
@@ -21,6 +22,8 @@ class Settings(BaseSettings):
     def validate_capacity(self):
         if self.max_running_jobs > self.max_active_jobs:
             raise ValueError("MAX_RUNNING_JOBS cannot exceed MAX_ACTIVE_JOBS")
+        if self.max_request_mb is not None and self.max_request_mb <= self.max_upload_mb:
+            raise ValueError("MAX_REQUEST_MB must exceed MAX_UPLOAD_MB to allow multipart headers")
         return self
 
     @field_validator("api_key")
@@ -34,3 +37,8 @@ class Settings(BaseSettings):
     @property
     def max_upload_bytes(self) -> int:
         return self.max_upload_mb * 1024 * 1024
+
+    @property
+    def max_request_bytes(self) -> int:
+        size_mb = self.max_request_mb if self.max_request_mb is not None else self.max_upload_mb + 1
+        return size_mb * 1024 * 1024
