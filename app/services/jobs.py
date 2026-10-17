@@ -101,6 +101,9 @@ class JobRepository:
                    AND (deadline_at IS NULL OR deadline_at > expires_at)"""
             )
             connection.execute("CREATE INDEX IF NOT EXISTS jobs_queue ON jobs(status, created_at)")
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS jobs_retention ON jobs(status, finished_at)"
+            )
             self._expire_in_connection(connection, self.now().isoformat(), None)
 
     def reserve_upload(
@@ -219,7 +222,7 @@ class JobRepository:
             self._expire_in_connection(connection, now, job.job_id)
             cursor = connection.execute(
                 """UPDATE jobs SET status = ?, result_json = ?, error_json = ?,
-                   finished_at = ?, run_token = NULL
+                   finished_at = ?
                    WHERE job_id = ? AND status = 'processing' AND run_token = ?""",
                 (
                     status,
@@ -232,6 +235,15 @@ class JobRepository:
             )
             return cursor.rowcount == 1
 
+    def release_execution(self, job: ClaimedJob) -> None:
+        """Acknowledge that the worker has stopped its child and closed its artifacts."""
+        with self._connection() as connection:
+            connection.execute(
+                """UPDATE jobs SET run_token = NULL WHERE job_id = ? AND run_token = ?
+                   AND status IN ('done', 'failed')""",
+                (str(job.job_id), job.run_token),
+            )
+
     def expire_due(self, job_id: UUID | None = None) -> int:
         with self._connection() as connection:
             connection.execute("BEGIN IMMEDIATE")
@@ -240,8 +252,8 @@ class JobRepository:
     @staticmethod
     def _expire_in_connection(connection: sqlite3.Connection, now: str, job_id: UUID | None) -> int:
         error = JobError(code="JOB_TIMEOUT", message="Job exceeded its time limit")
-        query = """UPDATE jobs SET status = 'failed', error_json = ?, finished_at = ?,
-                   run_token = NULL WHERE
+        # Keep the ownership token until the worker confirms its child has stopped.
+        query = """UPDATE jobs SET status = 'failed', error_json = ?, finished_at = ? WHERE
                    (status IN ('uploading', 'uploaded') AND expires_at <= ?
                     OR status = 'processing' AND deadline_at <= ?)"""
         parameters = [error.model_dump_json(), now, now, now]
