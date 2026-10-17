@@ -24,8 +24,10 @@ def load_analyzer(reference: str) -> Callable:
 
 
 def analyze_video(video_path: Path) -> dict:
-    """Baseline reference analyzer: returns no_violation until real model is integrated."""
-    return {"verdict": "no_violation", "violations": []}
+    """Compatibility entry point for the real local video pipeline."""
+    from app.services.video_analyzer import analyze_video as analyze_local_video
+
+    return analyze_local_video(video_path)
 
 
 def analyze_in_subprocess(reference: str, video_path: Path, output_path: Path) -> None:

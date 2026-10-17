@@ -1,4 +1,4 @@
--r requirements.txt
+-r requirements-video.txt
 httpx>=0.28,<1
 pytest>=8.3,<10
 ruff>=0.11,<1

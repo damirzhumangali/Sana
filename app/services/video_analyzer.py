@@ -1,186 +1,197 @@
+"""Local video inference and packaging of evidence for the temporal rule engine."""
+
 from __future__ import annotations
 
 import logging
+import math
+from collections.abc import Callable, Mapping
+from dataclasses import fields
+from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 import cv2
-from ultralytics import YOLO
+import numpy as np
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.schemas import AnalysisResult, Violation
-from app.services.detector import (
-    build_violation,
-    classify_persons,
-    detect_id_card_on_desk,
-)
+from app.services.analyzer import load_analyzer
+from app.services.cashier_rules import FrameObservation, RuleEngine
+from app.services.detector import classify_persons, create_evidence_frame
 
 logger = logging.getLogger(__name__)
 
-_YOLO_MODEL: YOLO | None = None
+# Providers run locally. Missing/None values mean unknown, not a negative observation.
+SignalProvider = Callable[[np.ndarray, float], Mapping[str, bool | None]]
+SIGNAL_FIELDS = frozenset(field.name for field in fields(FrameObservation)) - {
+    "timestamp_sec",
+    "cashier_present",
+    "client_count",
+    "entering_count",
+}
 
 
-def get_yolo_model() -> YOLO:
-    global _YOLO_MODEL
-    if _YOLO_MODEL is None:
-        logger.info("Loading YOLOv8n model...")
-        _YOLO_MODEL = YOLO("yolov8n.pt")
-    return _YOLO_MODEL
+class VideoAnalysisSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    video_model_path: Path = Path("yolov8n.pt")
+    video_sample_fps: float = Field(default=2.0, ge=0.5, allow_inf_nan=False)
+    video_signal_provider: str | None = None
+
+
+@lru_cache(maxsize=2)
+def _load_local_model(weights: str) -> Any:
+    # Import only after checking the file. No implicit weight download is allowed.
+    from ultralytics import YOLO
+
+    logger.info("Loading local detection weights: %s", weights)
+    return YOLO(weights, task="detect")
+
+
+def get_yolo_model(model_path: Path | str = Path("yolov8n.pt")) -> Any:
+    weights = Path(model_path).expanduser().resolve()
+    if weights.suffix.lower() != ".pt":
+        raise ValueError("VIDEO_MODEL_PATH must point to trained local .pt weights")
+    if not weights.is_file() or weights.stat().st_size == 0:
+        raise FileNotFoundError(f"Prepare nonempty local YOLO weights before analysis: {weights}")
+    return _load_local_model(str(weights))
 
 
 class VideoAnalyzer:
-    def __init__(self, sample_fps: float = 1.0) -> None:
+    def __init__(
+        self,
+        sample_fps: float = 2.0,
+        *,
+        model: Any | None = None,
+        model_path: Path | str = Path("yolov8n.pt"),
+        signal_provider: SignalProvider | None = None,
+    ) -> None:
+        if not math.isfinite(sample_fps) or sample_fps < 0.5:
+            raise ValueError("sample_fps must be finite and at least 0.5")
         self.sample_fps = sample_fps
-        self.model = get_yolo_model()
+        self.model = model if model is not None else get_yolo_model(model_path)
+        self.signal_provider = signal_provider
+
+    def observe(self, frame: np.ndarray, timestamp_sec: float) -> FrameObservation:
+        """Build an observation without promoting object candidates to verified actions.
+
+        COCO laptop detections cannot establish an open/unlocked screen. A white
+        rectangle or ID-card detection cannot establish verification by a cashier.
+        """
+        results = self.model(frame, verbose=False)[0]
+        person_boxes: list[list[float]] = []
+        person_confs: list[float] = []
+        for box in results.boxes:
+            cls_id = int(box.cls[0])
+            confidence = float(box.conf[0])
+            if self.model.names[cls_id] == "person" and confidence > 0.45:
+                person_boxes.append(box.xyxy[0].tolist())
+                person_confs.append(confidence)
+
+        height, width = frame.shape[:2]
+        classified = classify_persons(person_boxes, person_confs, frame_size=(width, height))
+        signals: Mapping[str, bool | None] = {}
+        if self.signal_provider is not None:
+            signals = self.signal_provider(frame, timestamp_sec)
+            if not isinstance(signals, Mapping):
+                raise ValueError("VIDEO_SIGNAL_PROVIDER must return a mapping of semantic signals")
+            if set(signals) - SIGNAL_FIELDS:
+                raise ValueError("VIDEO_SIGNAL_PROVIDER returned unsupported signal names")
+            if any(value is not None and type(value) is not bool for value in signals.values()):
+                raise ValueError("Semantic signal values must be bool or None")
+
+        return FrameObservation(
+            timestamp_sec=timestamp_sec,
+            cashier_present=bool(classified["cashier"]),
+            client_count=len(classified["client"]),
+            entering_count=len(classified["entering"]),
+            **signals,
+        )
 
     def analyze(self, video_path: Path) -> AnalysisResult:
+        video_path = Path(video_path)
         if not video_path.is_file() or video_path.stat().st_size == 0:
             raise ValueError(f"Video file {video_path} does not exist or is empty")
 
         cap = cv2.VideoCapture(str(video_path))
-        if not cap.isOpened():
-            raise RuntimeError(f"OpenCV could not open video: {video_path}")
-
-        video_fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        duration = total_frames / video_fps if video_fps > 0 else 0.0
-
-        logger.info(
-            "Analyzing %s: %.1f sec, %d frames @ %.1f FPS (sampling at %.1f FPS)",
-            video_path.name,
-            duration,
-            total_frames,
-            video_fps,
-            self.sample_fps,
-        )
-
-        step_frames = max(1, int(video_fps / self.sample_fps))
-        frame_idx = 0
-
-        cashier_timeline: list[tuple[float, bool]] = []
-        client_counts: list[tuple[float, int]] = []
-        entering_counts: list[tuple[float, int]] = []
-        id_card_timeline: list[tuple[float, bool]] = []
-        laptop_timeline: list[tuple[float, bool]] = []
-
-        while True:
-            ret, frame = cap.read()
-            if not ret or frame is None:
-                break
-
-            if frame_idx % step_frames == 0:
-                current_sec = round(frame_idx / video_fps, 2)
-                results = self.model(frame, verbose=False)[0]
-
-                person_boxes: list[list[float]] = []
-                person_confs: list[float] = []
-                has_laptop = False
-
-                for box in results.boxes:
-                    cls_id = int(box.cls[0])
-                    conf = float(box.conf[0])
-                    cls_name = self.model.names[cls_id]
-
-                    if cls_name == "person" and conf > 0.45:
-                        person_boxes.append(box.xyxy[0].tolist())
-                        person_confs.append(conf)
-                    elif cls_name == "laptop" and conf > 0.35:
-                        has_laptop = True
-
-                # Classify roles with glass reflection suppression
-                classified = classify_persons(person_boxes, person_confs)
-                has_cashier = len(classified["cashier"]) > 0
-                n_clients = len(classified["client"])
-                n_entering = len(classified["entering"])
-                has_id_card = detect_id_card_on_desk(frame)
-
-                cashier_timeline.append((current_sec, has_cashier))
-                client_counts.append((current_sec, n_clients))
-                entering_counts.append((current_sec, n_entering))
-                id_card_timeline.append((current_sec, has_id_card))
-                laptop_timeline.append((current_sec, has_laptop))
-
-            frame_idx += 1
-
-        cap.release()
-
         violations: list[Violation] = []
-
-        # Rule 1: Multiple clients / unauthorized persons in booth (NB RK #231, p. 8, 10)
-        multi_person_seconds = [
-            sec for (sec, c_cnt), (_, e_cnt) in zip(client_counts, entering_counts, strict=False)
-            if (c_cnt >= 2) or (c_cnt >= 1 and e_cnt >= 1)
-        ]
-        if len(multi_person_seconds) >= 2:
-            first_ts = multi_person_seconds[0]
-            violations.append(
-                build_violation(
-                    video_path=video_path,
-                    violation_type="Постороннее лицо / нарушение очередности",
-                    timecode_sec=first_ts,
-                    description=(
-                        "Обнаружено одновременное присутствие нескольких лиц в зоне обслуживания "
-                        "кассового узла (Постановление Правления НБРК № 231, п. 8, п. 10)."
-                    ),
-                )
+        decoded_frames = 0
+        rule_engine = RuleEngine()
+        try:
+            if not cap.isOpened():
+                raise RuntimeError(f"OpenCV could not open video: {video_path}")
+            video_fps = cap.get(cv2.CAP_PROP_FPS)
+            if not math.isfinite(video_fps) or video_fps <= 0:
+                raise ValueError("Video must report a finite, positive frame rate")
+            reported_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+            total_frames = (
+                int(reported_frames)
+                if math.isfinite(reported_frames) and reported_frames > 0
+                else 0
             )
-
-        # Rule 2: Cashier left workspace (NB RK #231, p. 14, 35)
-        ever_present = any(present for _, present in cashier_timeline)
-        if ever_present:
-            consecutive_absence = 0
-            absence_start_sec = 0.0
-            for sec, present in cashier_timeline:
-                if not present:
-                    if consecutive_absence == 0:
-                        absence_start_sec = sec
-                    consecutive_absence += 1
-                    if consecutive_absence >= 4:
-                        violations.append(
-                            build_violation(
-                                video_path=video_path,
-                                violation_type="Оставление рабочего места",
-                                timecode_sec=absence_start_sec,
-                                description=(
-                                    "Кассир покинул рабочее место при наличии оборудования "
-                                    "и ценностей в кассе (Постановление Правления НБРК № 231, "
-                                    "п. 14, п. 35)."
-                                ),
-                            )
+            logger.info("Analyzing %s at %.2f samples/sec", video_path.name, self.sample_fps)
+            next_sample_sec = 0.0
+            previous_timestamp = -1.0
+            while True:
+                ret, frame = cap.read()
+                if not ret or frame is None:
+                    break
+                # Prefer the decoder clock for variable-frame-rate containers.
+                # Some backends only return zero, so retain a CFR fallback.
+                decoder_timestamp = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0
+                timestamp_sec = decoded_frames / video_fps
+                if (
+                    math.isfinite(decoder_timestamp)
+                    and decoder_timestamp >= 0
+                    and decoder_timestamp > previous_timestamp
+                ):
+                    timestamp_sec = decoder_timestamp
+                if timestamp_sec <= previous_timestamp:
+                    raise RuntimeError("Video timestamps stopped increasing")
+                previous_timestamp = timestamp_sec
+                decoded_frames += 1
+                if timestamp_sec + 1e-9 < next_sample_sec:
+                    continue
+                next_sample_sec = (math.floor(timestamp_sec * self.sample_fps + 1e-9) + 1) / (
+                    self.sample_fps
+                )
+                observation = self.observe(frame, timestamp_sec)
+                events = rule_engine.process(observation)
+                if events:
+                    # Use the actual analyzed frame: a second seek can select a neighbour.
+                    evidence = create_evidence_frame(video_path, timestamp_sec, frame=frame)
+                    violations.extend(
+                        Violation(
+                            type=event.type,
+                            timecode_sec=evidence.timestamp_sec,
+                            description=event.description,
+                            evidence_frames=[evidence],
                         )
-                        break
-                else:
-                    consecutive_absence = 0
-
-        # Rule 3: Client serviced without ID verification (Law on AML/CFT art. 5, NB RK #231, p. 27)
-        # If client sat for > 8 seconds, but ID card was NEVER placed on the counter
-        client_seconds = [sec for sec, c_cnt in client_counts if c_cnt >= 1]
-        id_ever_presented = any(has_card for _, has_card in id_card_timeline)
-        if len(client_seconds) >= 8 and not id_ever_presented:
-            first_client_sec = client_seconds[0]
-            violations.append(
-                build_violation(
-                    video_path=video_path,
-                    violation_type="Прием клиента без проверки личности (ID)",
-                    timecode_sec=first_client_sec,
-                    description=(
-                        "Кассир начал обслуживание клиента без предварительной проверки "
-                        "документа, удостоверяющего личность (Закон РК «О ПОД/ФТ» ст. 5, "
-                        "Постановление Правления НБРК № 231, п. 27)."
-                    ),
-                )
-            )
+                        for event in events
+                    )
+            if decoded_frames == 0:
+                raise RuntimeError("Video contains no decodable frames")
+            # Tolerate one-frame metadata rounding, but never return a partial clean result.
+            if total_frames and decoded_frames < total_frames - 1:
+                raise RuntimeError("Video decoding stopped before the advertised end")
+        finally:
+            cap.release()
 
         verdict = "violation" if violations else "no_violation"
-        logger.info(
-            "Analysis complete for %s: verdict=%s, %d violations",
-            video_path.name,
-            verdict,
-            len(violations),
-        )
+        logger.info("Analysis complete: %s, %d events", verdict, len(violations))
         return AnalysisResult(verdict=verdict, violations=violations)
 
 
 def analyze_video(video_path: Path) -> dict:
-    """Entry point matching ANALYZER_CALLABLE=app.services.video_analyzer:analyze_video."""
-    analyzer = VideoAnalyzer(sample_fps=1.0)
-    result = analyzer.analyze(video_path)
-    return result.model_dump()
+    """Worker entry point: app.services.video_analyzer:analyze_video."""
+    settings = VideoAnalysisSettings()
+    provider = (
+        load_analyzer(settings.video_signal_provider) if settings.video_signal_provider else None
+    )
+    analyzer = VideoAnalyzer(
+        sample_fps=settings.video_sample_fps,
+        model_path=settings.video_model_path,
+        signal_provider=provider,
+    )
+    return analyzer.analyze(video_path).model_dump()

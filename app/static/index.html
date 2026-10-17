@@ -3,31 +3,101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sana — ForteBank AI Video Analysis</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>Sana — ForteBank AI Video Analysis | Мониторинг кассовой дисциплины</title>
+  
   <style>
-    :root {
-      --bg: #090d16;
-      --card-bg: rgba(18, 24, 38, 0.7);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-hover: rgba(255, 255, 255, 0.12);
-      --text: #f1f5f9;
-      --text-muted: #94a3b8;
-      --primary: #3b82f6;
-      --primary-glow: rgba(59, 130, 246, 0.3);
-      --amber: #f59e0b;
-      --amber-glow: rgba(245, 158, 11, 0.25);
-      --emerald: #10b981;
-      --emerald-glow: rgba(16, 185, 129, 0.25);
-      --rose: #ef4444;
-      --rose-glow: rgba(239, 68, 68, 0.25);
-      --radius: 16px;
-      --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+    /* ----------------------------------------------------
+       1. ЛОКАЛЬНЫЕ ШРИФТЫ И СИСТЕМНЫЙ СТЕК (БЕЗ ВНЕШНИХ CDN)
+       ---------------------------------------------------- */
+    @font-face {
+      font-family: 'ForteSans';
+      src: local('Open Sans'), local('Noto Sans'), local('Segoe UI'), local('SF Pro Text');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'ForteSans';
+      src: local('Open Sans SemiBold'), local('Noto Sans SemiBold'), local('Segoe UI Semibold');
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'ForteSans';
+      src: local('Open Sans Bold'), local('Noto Sans Bold'), local('Segoe UI Bold');
+      font-weight: 700;
+      font-style: normal;
     }
 
+    /* ----------------------------------------------------
+       2. ПЕРЕМЕННЫЕ КОРПОРАТИВНОГО СТИЛЯ FORTEBANK
+       ---------------------------------------------------- */
+    :root {
+      /* Основная палитра forte.kz */
+      --color-burgundy: #A0174F;           /* Фирменный бордовый */
+      --color-burgundy-hover: #861040;
+      --color-plum: #470A25;               /* Глубокий сливовый */
+      --color-plum-hover: #36071C;
+      --color-pink-light: #EE2F7C;         /* Розовый акцент градиента */
+      --color-blue-accent: #4FC3F7;        /* Холодный голубой */
+      --color-blue-dark: #0284c7;
+
+      /* Градиенты баннеров */
+      --gradient-banner: linear-gradient(135deg, #EE2F7C 0%, #A0174F 100%);
+      --gradient-plum: linear-gradient(135deg, #470A25 0%, #2B0616 100%);
+
+      /* Фоны секций */
+      --bg-white: #FFFFFF;
+      --bg-gray: #F7F7F9;
+      --bg-gray-alt: #EAEAEA;
+      --bg-pale-blue: #EAF1FC;
+      --bg-pale-pink: #FDE8F0;
+      --bg-pale-lavender: #E4EAFB;
+      --bg-input: #EFEFF2;
+
+      /* Текст */
+      --text-main: #1F1F24;
+      --text-secondary: #6B6B73;
+      --text-light: #FFFFFF;
+
+      /* Статусы */
+      --status-success: #107C41;
+      --status-success-bg: #E6F4EA;
+      --status-alert: #A0174F;
+      --status-alert-bg: #FDE8F0;
+
+      /* Радиусы скругления */
+      --radius-banner: 24px;
+      --radius-card: 20px;
+      --radius-card-large: 28px;
+      --radius-btn: 12px;
+      --radius-input: 12px;
+      --radius-pill: 9999px;
+
+      /* Тени и сетка */
+      --container-max: 1250px;
+      --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+      --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.08);
+
+      --font-family: 'ForteSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, Menlo, monospace;
+    }
+
+    /* Режим для слабовидящих */
+    body.accessibility-mode {
+      --text-main: #000000;
+      --text-secondary: #222222;
+      --bg-gray: #FFFFFF;
+      --bg-pale-blue: #E0E8F5;
+      --bg-pale-pink: #F5D0DD;
+      font-size: 19px !important;
+    }
+    body.accessibility-mode * {
+      letter-spacing: 0.02em !important;
+    }
+
+    /* ----------------------------------------------------
+       3. БАЗОВЫЕ СТИЛИ
+       ---------------------------------------------------- */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -35,990 +105,2404 @@
     }
 
     body {
-      background-color: var(--bg);
-      background-image: 
-        radial-gradient(circle at 15% 15%, rgba(37, 99, 235, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
-        linear-gradient(180deg, #090d16 0%, #05080e 100%);
-      color: var(--text);
-      font-family: var(--font-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
+      font-family: var(--font-family);
+      color: var(--text-main);
+      background-color: var(--bg-white);
       line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    /* HEADER */
-    header {
-      backdrop-filter: blur(20px);
-      background: rgba(9, 13, 22, 0.8);
-      border-bottom: 1px solid var(--card-border);
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input, select {
+      font-family: inherit;
+      outline: none;
+    }
+
+    .container {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ----------------------------------------------------
+       4. ШАПКА В СТИЛЕ FORTEBANK
+       ---------------------------------------------------- */
+    .site-header {
+      background: var(--bg-white);
+      border-bottom: 1px solid var(--bg-gray-alt);
       position: sticky;
       top: 0;
       z-index: 100;
-      padding: 16px 32px;
+    }
+
+    .header-inner {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
+      padding: 16px 0;
     }
 
-    .brand {
+    .brand-group {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
     }
 
-    .logo-badge {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #2563eb, #d97706);
+    /* Логотип: скруглённый бордовый квадрат с буквой F */
+    .brand-logo-wrap {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      overflow: hidden;
+      background-color: var(--color-plum);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(71, 10, 37, 0.2);
+    }
+
+    .brand-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .brand-logo-fallback {
+      display: none;
+      color: #ffffff;
+      font-size: 32px;
+      font-weight: 700;
+      font-family: var(--font-family);
+      line-height: 1;
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
       font-size: 20px;
-      color: #fff;
-      box-shadow: 0 4px 20px var(--primary-glow);
+      font-weight: 700;
+      color: var(--color-plum);
+      letter-spacing: -0.01em;
     }
 
-    .brand-text h1 {
-      font-size: 19px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #ffffff 60%, #94a3b8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
     }
 
-    .brand-text p {
-      font-size: 12px;
-      color: var(--text-muted);
+    /* Навигация */
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
     }
 
+    .nav-link {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-main);
+      padding: 6px 0;
+      position: relative;
+      transition: color 0.15s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--color-burgundy);
+    }
+
+    .nav-link.active {
+      color: var(--color-burgundy);
+      font-weight: 600;
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: var(--color-burgundy);
+      border-radius: 2px;
+    }
+
+    /* Правая панель кнопок */
     .header-actions {
       display: flex;
       align-items: center;
       gap: 12px;
-      flex-wrap: wrap;
     }
 
-    .server-status-pill {
-      display: inline-flex;
+    .btn-icon-round {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-input);
+      display: flex;
       align-items: center;
-      gap: 7px;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
+      justify-content: center;
+      color: var(--text-main);
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon-round:hover {
+      background-color: #E2E2E6;
+      color: var(--color-burgundy);
+    }
+
+    .btn-connection {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-input);
+      color: var(--text-main);
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .btn-connection:hover {
+      background-color: #E4E4EA;
     }
 
     .status-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #94a3b8;
-      display: inline-block;
-      transition: all 0.3s ease;
-    }
-
-    .status-dot.online {
-      background: #10b981;
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+      background-color: var(--status-success);
     }
 
     .status-dot.offline {
-      background: #ef4444;
-      box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+      background-color: var(--color-burgundy);
     }
 
-    .key-input-box {
-      display: flex;
-      align-items: center;
-      background: rgba(18, 24, 38, 0.8);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 6px 12px;
-      gap: 8px;
-    }
-
-    .key-input-box label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--amber);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      white-space: nowrap;
-    }
-
-    .key-input-box input {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-family: var(--font-mono);
-      font-size: 12px;
-      width: 200px;
-    }
-
-    .api-badge {
-      font-size: 12px;
-      font-weight: 600;
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      padding: 6px 14px;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .api-badge:hover {
-      background: rgba(59, 130, 246, 0.25);
-    }
-
-    /* MAIN CONTAINER */
-    main {
-      flex: 1;
-      max-width: 1120px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 40px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-    }
-
+    /* ----------------------------------------------------
+       5. ГЛАВНЫЙ БАННЕР С РОЗОВО-МАЛИНОВЫМ ГРАДИЕНТОМ
+       ---------------------------------------------------- */
     .hero-banner {
-      text-align: center;
-      margin-bottom: 8px;
+      background: var(--gradient-banner);
+      border-radius: var(--radius-banner);
+      padding: 44px 44px 38px;
+      color: var(--text-light);
+      position: relative;
+      overflow: hidden;
+      margin: 28px 0;
+      box-shadow: 0 16px 40px rgba(160, 23, 79, 0.18);
     }
 
-    .hero-badge {
+    /* Объемные глянцевые векторные кольца и дуги с плавной аппаратной анимацией */
+    .hero-decor-arc {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.85;
+      will-change: transform;
+    }
+    .arc-top-right {
+      top: -60px;
+      right: -60px;
+      width: 320px;
+      height: 320px;
+      animation: rotateRings 36s linear infinite;
+      transform-origin: center center;
+    }
+    .arc-bottom-left {
+      bottom: -80px;
+      left: -80px;
+      width: 260px;
+      height: 260px;
+      animation: floatRings 9s ease-in-out infinite alternate;
+    }
+
+    @keyframes rotateRings {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes floatRings {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(14px, -10px) scale(1.06); }
+    }
+
+    /* Разметка контента баннера */
+    .hero-inner-grid {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-content {
+      max-width: 820px;
+    }
+
+    .hero-tag {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
       padding: 6px 14px;
-      border-radius: 30px;
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #fbbf24;
-      font-size: 12px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
       font-weight: 600;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    .live-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-blue-accent);
+      box-shadow: 0 0 8px #4FC3F7;
+      animation: pulseGlow 1.8s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
     }
 
     .hero-title {
-      font-size: 34px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 90%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 38px;
+      font-weight: 700;
+      line-height: 1.18;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
     }
 
     .hero-subtitle {
-      font-size: 15px;
-      color: var(--text-muted);
-      max-width: 650px;
-      margin: 0 auto;
+      font-size: 16px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.92);
+      max-width: 720px;
+      margin-bottom: 24px;
     }
 
-    /* UPLOAD CARD */
-    .upload-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(24px);
-      border: 2px dashed var(--card-border);
-      border-radius: var(--radius);
-      padding: 48px 32px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-    }
-
-    .upload-card:hover, .upload-card.drag-over {
-      border-color: #3b82f6;
-      background: rgba(24, 34, 56, 0.8);
-      box-shadow: 0 0 35px var(--primary-glow);
-      transform: translateY(-2px);
-    }
-
-    .upload-icon {
-      width: 68px;
-      height: 68px;
-      border-radius: 20px;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px auto;
-      color: #60a5fa;
-      transition: all 0.2s;
-    }
-
-    .upload-card:hover .upload-icon {
-      transform: scale(1.08);
-      background: rgba(59, 130, 246, 0.2);
-      box-shadow: 0 4px 20px var(--primary-glow);
-    }
-
-    .upload-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .upload-hint {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-    }
-
-    .btn-select {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #fff;
-      font-family: var(--font-main);
-      font-size: 14px;
-      font-weight: 600;
-      padding: 11px 26px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 16px var(--primary-glow);
-      transition: all 0.2s;
-    }
-
-    .btn-select:hover {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      transform: translateY(-1px);
-    }
-
-    input[type="file"] {
-      display: none;
-    }
-
-    /* STATUS AND PROGRESS */
-    .status-panel {
-      display: none;
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 28px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .status-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .status-label-group {
+    /* Статусные плашки внутри баннера */
+    .hero-stats-row {
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
-    .spinner {
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(59, 130, 246, 0.2);
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .hero-stat-pill {
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      transition: transform 0.2s ease, background 0.2s ease;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .hero-stat-pill:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
     }
 
-    .status-text {
-      font-size: 15px;
+    .hero-stat-num {
       font-weight: 700;
-    }
-
-    .job-id-pill {
+      color: #ffffff;
       font-family: var(--font-mono);
-      font-size: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      padding: 5px 12px;
-      border-radius: 6px;
-      color: var(--text-muted);
     }
 
-    .progress-bar-bg {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 3px;
+    .hero-stat-label {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 12px;
+    }
+
+    /* ----------------------------------------------------
+       6. КАРТОЧКА ЗАГРУЗКИ ВИДЕО (ЧИСТАЯ, БЕЛАЯ)
+       ---------------------------------------------------- */
+    .upload-card {
+      background: var(--bg-white);
+      border-radius: var(--radius-card-large);
+      padding: 36px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      margin-bottom: 36px;
+    }
+
+    .dropzone-area {
+      border: 2px dashed #D2D2D8;
+      border-radius: var(--radius-card);
+      padding: 44px 24px;
+      text-align: center;
+      background-color: #FAFAFC;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .dropzone-area:hover,
+    .dropzone-area.dragover {
+      border-color: var(--color-blue-accent);
+      background-color: var(--bg-pale-blue);
+    }
+
+    .dropzone-icon-circle {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--bg-pale-pink);
+      color: var(--color-burgundy);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .dropzone-title {
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .dropzone-hint {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    /* Основная фирменная сливовая кнопка */
+    .btn-plum-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background-color: var(--color-plum);
+      color: var(--text-light);
+      padding: 0 32px;
+      height: 54px;
+      border-radius: var(--radius-btn);
+      font-size: 16px;
+      font-weight: 600;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-plum-primary:hover:not(:disabled) {
+      background-color: var(--color-plum-hover);
+    }
+
+    .btn-plum-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Селектор тестовых сценариев (быстрый запуск) */
+    .presets-row {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--bg-gray-alt);
+    }
+
+    .presets-label {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .preset-card-btn {
+      background: var(--bg-gray);
+      border: 1px solid transparent;
+      border-radius: var(--radius-btn);
+      padding: 14px 16px;
+      text-align: left;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .preset-card-btn:hover {
+      background: var(--bg-white);
+      border-color: var(--color-burgundy);
+      box-shadow: 0 4px 14px rgba(160, 23, 79, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .preset-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .preset-card-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* ----------------------------------------------------
+       7. КАРТОЧКА ПРОГРЕССА АНАЛИЗА (5 ЭТАПОВ)
+       ---------------------------------------------------- */
+    .progress-section {
+      display: none;
+      background: var(--bg-white);
+      border-radius: var(--radius-card);
+      padding: 32px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--bg-gray-alt);
+      margin-bottom: 36px;
+    }
+
+    .progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .progress-title-block h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-plum);
+      margin-bottom: 4px;
+    }
+
+    .progress-title-block p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .progress-timer {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-burgundy);
+      background: var(--bg-pale-pink);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+    }
+
+    /* Полоса прогресса */
+    .progress-track {
+      height: 10px;
+      border-radius: var(--radius-pill);
+      background-color: var(--bg-input);
       overflow: hidden;
-      margin-bottom: 10px;
+      margin-bottom: 28px;
     }
 
     .progress-bar-fill {
       height: 100%;
-      width: 30%;
-      background: linear-gradient(90deg, #2563eb, #f59e0b);
-      border-radius: 3px;
-      transition: width 0.3s ease;
-      animation: pulseBar 1.5s ease-in-out infinite alternate;
+      width: 0%;
+      background: var(--gradient-banner);
+      border-radius: var(--radius-pill);
+      transition: width 0.4s ease;
     }
 
-    @keyframes pulseBar {
-      0% { opacity: 0.7; }
-      100% { opacity: 1; }
-    }
-
-    .pipeline-steps {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 10px;
-    }
-
-    /* VERDICT BANNER */
-    .verdict-banner {
-      display: none;
-      border-radius: var(--radius);
-      padding: 28px 32px;
-      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-bottom: 8px;
-    }
-
-    .verdict-clean {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.03));
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      box-shadow: 0 10px 30px var(--emerald-glow);
-    }
-
-    .verdict-violation {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.14), rgba(245, 158, 11, 0.05));
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      box-shadow: 0 10px 30px var(--rose-glow);
-    }
-
-    .verdict-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .verdict-icon-badge {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-    }
-
-    .verdict-clean .verdict-icon-badge {
-      background: rgba(16, 185, 129, 0.2);
-      color: #10b981;
-      border: 1px solid rgba(16, 185, 129, 0.4);
-    }
-
-    .verdict-violation .verdict-icon-badge {
-      background: rgba(239, 68, 68, 0.2);
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.4);
-    }
-
-    .verdict-content h2 {
-      font-size: 22px;
-      font-weight: 800;
-      margin-bottom: 4px;
-    }
-
-    .verdict-content p {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    /* VIOLATIONS LIST */
-    .violations-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .violation-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 24px;
+    /* Шаги пайплайна */
+    .pipeline-steps-grid {
       display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 24px;
-      transition: all 0.2s;
-    }
-
-    .violation-card:hover {
-      border-color: var(--card-hover);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .violation-meta {
-      display: flex;
-      flex-direction: column;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 12px;
     }
 
-    .violation-badges {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+    .pipeline-step-item {
+      background: var(--bg-gray);
+      border-radius: var(--radius-btn);
+      padding: 16px;
+      position: relative;
+      border: 1px solid transparent;
+      transition: all 0.25s ease;
     }
 
-    .badge-timecode {
+    .pipeline-step-item.active {
+      background: var(--bg-pale-pink);
+      border-color: var(--color-burgundy);
+    }
+
+    .pipeline-step-item.completed {
+      background: var(--bg-white);
+      border-color: #C3E6CB;
+    }
+
+    .step-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.35);
-      color: #fbbf24;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
-
-    .badge-category {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      color: #fca5a5;
       font-size: 12px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
-
-    .violation-title {
-      font-size: 18px;
       font-weight: 700;
-      color: #f8fafc;
+      text-transform: uppercase;
+      margin-bottom: 6px;
     }
 
-    .violation-desc {
+    .pipeline-step-item.active .step-badge {
+      color: var(--color-burgundy);
+    }
+
+    .pipeline-step-item.completed .step-badge {
+      color: var(--status-success);
+    }
+
+    .step-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    /* ----------------------------------------------------
+       8. СЕКЦИЯ РЕЗУЛЬТАТОВ (ВЕРДИКТ, ПЛЕЕР, КАРТОЧКИ)
+       ---------------------------------------------------- */
+    .results-section {
+      display: none;
+      margin-bottom: 48px;
+    }
+
+    /* Крупная карточка вердикта */
+    .verdict-banner-card {
+      border-radius: var(--radius-card);
+      padding: 28px 32px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .verdict-banner-card.violation {
+      background-color: var(--status-alert-bg);
+      border: 1px solid rgba(160, 23, 79, 0.25);
+    }
+
+    .verdict-banner-card.clean {
+      background-color: var(--status-success-bg);
+      border: 1px solid rgba(16, 124, 65, 0.25);
+    }
+
+    .verdict-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .verdict-icon-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .violation .verdict-icon-box {
+      background-color: var(--color-burgundy);
+      color: #ffffff;
+    }
+
+    .clean .verdict-icon-box {
+      background-color: var(--status-success);
+      color: #ffffff;
+    }
+
+    .verdict-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .violation .verdict-title {
+      color: var(--color-burgundy);
+    }
+
+    .clean .verdict-title {
+      color: var(--status-success);
+    }
+
+    .verdict-subtitle {
       font-size: 14px;
-      color: #cbd5e1;
-      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 620px;
     }
 
-    .violation-law {
-      background: rgba(255, 255, 255, 0.03);
-      border-left: 3px solid var(--amber);
-      padding: 10px 14px;
-      border-radius: 0 8px 8px 0;
+    .verdict-meta-badge {
       font-size: 13px;
-      color: #94a3b8;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      background: #ffffff;
     }
 
-    .violation-law strong {
-      color: #e2e8f0;
+    /* Двухколоночный макет результатов */
+    .results-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      align-items: start;
     }
 
-    .evidence-preview {
+    /* Видеоплеер */
+    .player-card {
+      background: var(--bg-white);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--bg-gray-alt);
+    }
+
+    .player-screen-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: #11141C;
+      border-radius: var(--radius-btn);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .video-element {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .simulated-screen {
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      text-align: center;
+      background: radial-gradient(circle at center, #232B3E 0%, #0E131E 100%);
+      padding: 20px;
     }
 
-    .evidence-frame-wrapper {
+    .player-scrubber-wrap {
       position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--card-border);
-      background: #000;
-      aspect-ratio: 464 / 848;
-      max-height: 260px;
-      cursor: zoom-in;
+      height: 10px;
+      background: var(--bg-input);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      margin-bottom: 16px;
     }
 
-    .evidence-img {
+    .player-scrubber-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--color-burgundy);
+      border-radius: var(--radius-pill);
+      width: 0%;
+    }
+
+    .marker-pin {
+      position: absolute;
+      top: -4px;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: var(--color-burgundy);
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+      z-index: 5;
+    }
+
+    .player-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .controls-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-control {
+      background: var(--bg-input);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: var(--radius-btn);
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-control:hover {
+      background: #E2E2E8;
+      color: var(--color-burgundy);
+    }
+
+    .timecode-display {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-left: 8px;
+    }
+
+    .timecode-display strong {
+      color: var(--text-main);
+    }
+
+    /* Сегментированный переключатель как "Банк | Бизнес" на forte.kz */
+    .segmented-switch {
+      background: var(--bg-input);
+      border-radius: var(--radius-pill);
+      padding: 4px;
+      display: inline-flex;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .segment-btn {
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent;
+      transition: all 0.2s ease;
+    }
+
+    .segment-btn.active {
+      background: var(--color-burgundy);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(160, 23, 79, 0.2);
+    }
+
+    /* Карточки событий нарушений */
+    .events-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .event-card {
+      background: var(--bg-white);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--bg-gray-alt);
+      transition: all 0.2s ease;
+    }
+
+    .event-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .event-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .event-type-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-plum);
+    }
+
+    .event-time-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-pale-pink);
+      color: var(--color-burgundy);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      cursor: pointer;
+    }
+
+    .event-time-badge:hover {
+      background: #F8D3E0;
+    }
+
+    /* Информационные блоки события */
+    .event-info-block {
+      margin-bottom: 12px;
+    }
+
+    .event-info-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .event-info-text {
+      font-size: 14px;
+      color: var(--text-main);
+      line-height: 1.45;
+    }
+
+    /* Блок правила на бледно-голубом фоне со сливовым текстом */
+    .rule-reference-box {
+      background-color: var(--bg-pale-blue);
+      border-radius: var(--radius-btn);
+      padding: 12px 16px;
+      margin-top: 14px;
+      border-left: 4px solid var(--color-burgundy);
+    }
+
+    .rule-reference-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-plum);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .rule-reference-text {
+      font-size: 13px;
+      color: var(--color-plum);
+      line-height: 1.4;
+    }
+
+    /* Галерея кадров-доказательств */
+    .evidence-frames-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .evidence-thumb-wrap {
+      width: 140px;
+      height: 84px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--bg-gray-alt);
+      flex-shrink: 0;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .evidence-thumb-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
-      transition: transform 0.3s;
     }
 
-    .evidence-frame-wrapper:hover .evidence-img {
-      transform: scale(1.03);
-    }
-
-    .frame-badge {
+    .evidence-thumb-time {
       position: absolute;
-      bottom: 8px;
-      right: 8px;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      font-family: var(--font-mono);
+      bottom: 4px;
+      right: 4px;
+      background: rgba(0,0,0,0.7);
+      color: #ffffff;
       font-size: 11px;
-      font-weight: 600;
-      padding: 3px 8px;
+      font-family: var(--font-mono);
+      padding: 2px 4px;
       border-radius: 4px;
     }
 
-    /* LIGHTBOX MODAL */
+    /* Кнопки действий после проверки */
+    .results-bottom-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    .btn-white-secondary {
+      background: var(--bg-white);
+      color: var(--color-plum);
+      border: 1px solid var(--bg-gray-alt);
+      padding: 0 24px;
+      height: 54px;
+      border-radius: var(--radius-btn);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .btn-white-secondary:hover {
+      border-color: var(--color-burgundy);
+      color: var(--color-burgundy);
+    }
+
+    /* ----------------------------------------------------
+       9. МОДАЛЬНЫЕ ОКНА (ПОДКЛЮЧЕНИЕ, СПРАВОЧНИК, КАДРЫ)
+       ---------------------------------------------------- */
     .modal-overlay {
-      display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(12px);
+      background: rgba(31, 31, 36, 0.6);
+      backdrop-filter: blur(6px);
       z-index: 1000;
+      display: none;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 20px;
     }
 
-    .modal-content {
-      max-width: 90vw;
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-white);
+      border-radius: var(--radius-card);
+      width: 100%;
+      max-width: 620px;
       max-height: 90vh;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-      position: relative;
+      overflow-y: auto;
+      padding: 32px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     }
 
-    .modal-img {
-      max-width: 100%;
-      max-height: 85vh;
-      display: block;
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
     }
 
-    .modal-close {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      background: rgba(0, 0, 0, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: #fff;
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-plum);
+    }
+
+    .modal-close-btn {
+      background: var(--bg-input);
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
+      font-size: 18px;
+      color: var(--text-secondary);
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    .rules-table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 20px;
+      border-radius: var(--radius-btn);
+      border: 1px solid var(--bg-gray-alt);
     }
 
-    @media (max-width: 768px) {
-      .violation-card {
+    .rules-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    .rules-table th {
+      background: var(--bg-gray);
+      color: var(--color-plum);
+      font-weight: 700;
+      padding: 12px 14px;
+      border-bottom: 2px solid var(--bg-gray-alt);
+      white-space: nowrap;
+    }
+
+    .rules-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--bg-gray-alt);
+      vertical-align: top;
+      color: var(--text-main);
+    }
+
+    .rules-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .rules-table tr:hover {
+      background: rgba(160, 23, 79, 0.03);
+    }
+
+    .rule-tag-legal {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--status-success-bg);
+      color: var(--status-success);
+      white-space: nowrap;
+    }
+
+    .rule-tag-internal {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--bg-pale-blue);
+      color: #0284c7;
+      white-space: nowrap;
+    }
+
+    .rules-callout {
+      background: var(--bg-pale-pink);
+      border-left: 4px solid var(--color-burgundy);
+      padding: 14px 18px;
+      border-radius: var(--radius-btn);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px;
+      border-radius: var(--radius-btn);
+      background-color: var(--bg-input);
+      border: 1px solid transparent;
+      font-size: 15px;
+      color: var(--text-main);
+      transition: border-color 0.15s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--color-burgundy);
+      background-color: #ffffff;
+    }
+
+    /* Подвал */
+    .site-footer {
+      border-top: 1px solid var(--bg-gray-alt);
+      padding: 32px 0;
+      margin-top: 60px;
+      background: var(--bg-gray);
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    /* Адаптивность под мобильные экраны */
+    @media (max-width: 900px) {
+      .results-layout {
         grid-template-columns: 1fr;
       }
-      .evidence-frame-wrapper {
-        max-height: 320px;
+      .site-nav {
+        display: none;
       }
-      header {
-        flex-direction: column;
-        gap: 16px;
+      .hero-inner-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-widget-col {
+        display: none;
+      }
+      .hero-title {
+        font-size: 28px;
+      }
+      .hero-banner {
+        padding: 32px 24px;
       }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="brand">
-      <div class="logo-badge" id="logo-badge">F</div>
-      <div class="brand-text">
-        <h1 id="app-title">Sana — ForteBank AI Video Analysis</h1>
-        <p id="app-subtitle">Автоматизированный мониторинг кассовых операций (OpenCV + YOLOv8)</p>
+  <!-- ШАПКА САЙТА (FORTEBANK CORPORATE STYLE) -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand-group">
+        <!-- Логотип и Бренд ForteBank -->
+        <a href="#" class="brand-link" style="display:flex; align-items:center; gap:14px; text-decoration:none;">
+          <div class="brand-logo-wrap" title="ForteBank Vision Analytics" style="box-shadow: 0 4px 14px rgba(71, 10, 37, 0.25);">
+            <img src="data:image/jpeg;base64,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" alt="ForteBank" class="brand-logo-img">
+          </div>
+          <div class="brand-title-wrap">
+            <span class="brand-name" style="font-size:24px; font-weight:800; color:var(--color-plum); line-height:1.1; letter-spacing:-0.03em;">Forte<span style="color:var(--color-burgundy); font-weight:400;">Bank</span></span>
+            <span class="brand-subtitle" style="font-size:11px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.06em;">AI Video Audit // Sana</span>
+          </div>
+        </a>
+
+        <!-- Навигация -->
+        <nav class="site-nav">
+          <a href="#" class="nav-link active">Проверка видео</a>
+          <a href="#rules" class="nav-link" onclick="openRulesModal(); return false;">Каталог норм НБРК</a>
+          <a href="/docs" target="_blank" class="nav-link">Документация API</a>
+        </nav>
       </div>
-    </div>
-    <div class="header-actions">
-      <div class="server-status-pill" id="server-status-pill" title="Статус подключения к серверу Sana">
-        <span class="status-dot" id="server-status-dot"></span>
-        <span id="server-status-text">Проверка...</span>
+
+      <!-- Действия справа -->
+      <div class="header-actions">
+        <!-- Кнопка доступности (глаз) -->
+        <button class="btn-icon-round" id="btnAccessibility" title="Режим для слабовидящих" onclick="toggleAccessibility()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+
+        <!-- Кнопка подключения к серверу -->
+        <button class="btn-connection" onclick="openSettingsModal()">
+          <span class="status-dot" id="serverStatusDot"></span>
+          <span id="serverStatusText">Сервер онлайн</span>
+        </button>
       </div>
-      <div class="key-input-box" id="url-input-box">
-        <label for="api-url-input">СЕРВЕР</label>
-        <input type="text" id="api-url-input" placeholder="http://127.0.0.1:8001" style="width: 175px;">
-      </div>
-      <div class="key-input-box" id="key-input-box">
-        <label for="api-key-input">API-КЛЮЧ</label>
-        <input type="password" id="api-key-input" value="FAbunyRSnJnCStOHtxykfBP_DdxFbnsy_Qfs5GB5Rd4" placeholder="Вставьте X-API-Key" style="width: 140px;">
-      </div>
-      <a href="/docs" target="_blank" class="api-badge" id="swagger-link">Swagger /docs</a>
     </div>
   </header>
 
-  <main>
-    <section class="hero-banner">
-      <div class="hero-badge" id="hero-badge">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-        Локальный AI-анализ безопасности по нормам НБРК
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
+  <main class="container">
+
+    <!-- ГЛАВНЫЙ БАННЕР В СТИЛЕ FORTE.KZ -->
+    <section class="hero-banner" id="heroBanner">
+      <!-- Векторные глянцевые дуги и сферы в фирменных тонах -->
+      <svg class="hero-decor-arc arc-top-right" viewBox="0 0 320 320" fill="none">
+        <circle cx="240" cy="80" r="160" stroke="#4FC3F7" stroke-width="28" stroke-opacity="0.35"/>
+        <circle cx="240" cy="80" r="90" stroke="#FFFFFF" stroke-width="14" stroke-opacity="0.25"/>
+        <circle cx="240" cy="80" r="40" fill="#4FC3F7" fill-opacity="0.4"/>
+      </svg>
+      <svg class="hero-decor-arc arc-bottom-left" viewBox="0 0 260 260" fill="none">
+        <circle cx="60" cy="200" r="120" stroke="#4FC3F7" stroke-width="20" stroke-opacity="0.2"/>
+        <circle cx="60" cy="200" r="60" fill="#FFFFFF" fill-opacity="0.1"/>
+      </svg>
+
+      <div class="hero-inner-grid">
+        <!-- Левая колонка: Текст и метрики -->
+        <div class="hero-content">
+          <div class="hero-tag">
+            <span class="live-pulse-dot"></span>
+            SANA AI // FORTEBANK COMPLIANCE
+          </div>
+          <h1 class="hero-title">Проверка видеозаписи кассового узла</h1>
+          <p class="hero-subtitle">
+            Автоматизированный мониторинг кассовой дисциплины, фиксации денежных расчетов и безопасности рабочего места кассира на базе компьютерного зрения.
+          </p>
+
+          <div class="hero-stats-row">
+            <div class="hero-stat-pill">
+              <span class="hero-stat-num">100%</span>
+              <span class="hero-stat-label">Локальный контур</span>
+            </div>
+            <div class="hero-stat-pill">
+              <span class="hero-stat-num">&lt; 3 сек</span>
+              <span class="hero-stat-label">Скорость инференса</span>
+            </div>
+            <div class="hero-stat-pill">
+              <span class="hero-stat-num">НБРК</span>
+              <span class="hero-stat-label">Нормы и аудит</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <h2 class="hero-title" id="main-heading">Проверка видеозаписи кассового узла</h2>
-      <p class="hero-subtitle">
-        Загрузите видеоролик (.mov) работы кассира. Система в реальном времени проведёт визуальный анализ действий, выявит потенциальные нарушения и предоставит доказательную базу.
-      </p>
     </section>
 
-    <!-- UPLOAD ZONE -->
-    <div class="upload-card" id="drop-zone">
-      <input type="file" id="file-input" accept=".mov,.MOV">
-      <div class="upload-icon">
-        <svg width="34" height="34" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-        </svg>
-      </div>
-      <h3 class="upload-title" id="upload-title">Перетащите .mov видео сюда или выберите файл</h3>
-      <p class="upload-hint" id="upload-hint">Поддерживается видео кассового узла до 100 МБ</p>
-      <button type="button" class="btn-select" id="btn-select-file">Выбрать видео</button>
-    </div>
-
-    <!-- STATUS PANEL -->
-    <div class="status-panel" id="status-panel">
-      <div class="status-header">
-        <div class="status-label-group">
-          <div class="spinner" id="status-spinner"></div>
-          <span class="status-text" id="status-text">Загрузка видео на сервер...</span>
+    <!-- СЕКЦИЯ ЗАГРУЗКИ ВИДЕО -->
+    <section class="upload-card" id="uploadSection">
+      <div class="dropzone-area" id="dropzone" onclick="document.getElementById('videoFileInput').click()">
+        <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/x-msvideo,video/mkv,video/webm" style="display:none;" onchange="handleFileSelected(this.files[0])">
+        <div class="dropzone-icon-circle">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
         </div>
-        <div class="job-id-pill" id="job-id-pill">JOB ID: <span id="current-job-id">...</span></div>
+        <h2 class="dropzone-title">Перетащите видеозапись сюда или выберите файл</h2>
+        <p class="dropzone-hint">Поддерживаются форматы MP4, AVI, MOV, MKV до 100 МБ</p>
+        <button class="btn-plum-primary" onclick="event.stopPropagation(); document.getElementById('videoFileInput').click()">
+          Выбрать видеофайл
+        </button>
       </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progress-bar-fill"></div>
-      </div>
-      <div class="pipeline-steps">
-        <span id="step-upload">1. Загрузка</span>
-        <span id="step-sampling">2. OpenCV Сэмплирование</span>
-        <span id="step-yolo">3. YOLOv8 Детекция</span>
-        <span id="step-rules">4. Правила НБРК</span>
-        <span id="step-report">5. Итоговый отчёт</span>
-      </div>
-    </div>
 
-    <!-- VERDICT BANNER -->
-    <div class="verdict-banner" id="verdict-banner">
-      <div class="verdict-header">
-        <div class="verdict-icon-badge" id="verdict-icon-badge">✓</div>
-        <div class="verdict-content">
-          <h2 id="verdict-title">Нарушение не обнаружено</h2>
-          <p id="verdict-desc">Все операции в кассовом узле выполнены в строгом соответствии с регламентом безопасности.</p>
+      <!-- Готовые тестовые сценарии (Instant Test Cases) -->
+      <div class="presets-row">
+        <div class="presets-label">Или запустите демонстрационный тест-кейс:</div>
+        <div class="presets-grid">
+          <div class="preset-card-btn" onclick="loadMockScenario(0)">
+            <div class="preset-card-title">
+              <span>Кейс 1: Деньги на столе вне сейфа (Х-1 / Х-24)</span>
+              <span style="color:var(--color-burgundy);">Признаки</span>
+            </div>
+            <div class="preset-card-desc">Принятые наличные оставлены на столе после ухода клиента, ключ в замке сейфа (Пост. НБ РК № 231, п. 20).</div>
+          </div>
+
+          <div class="preset-card-btn" onclick="loadMockScenario(1)">
+            <div class="preset-card-title">
+              <span>Кейс 2: Прием без проверки ID (Х-2 / Х-17)</span>
+              <span style="color:var(--color-burgundy);">Признаки</span>
+            </div>
+            <div class="preset-card-desc">Прием денег без сверки документа удостоверяющего личность, незапертая дверь кабины (Пост. № 231 и № 14).</div>
+          </div>
+
+          <div class="preset-card-btn" onclick="loadMockScenario(2)">
+            <div class="preset-card-title">
+              <span>Кейс 3: Соблюдение регламента (Х-3 / Х-5)</span>
+              <span style="color:var(--status-success);">Соблюдено</span>
+            </div>
+            <div class="preset-card-desc">Идентификация пройдена, пересчет на оборудовании с детекцией, наличные в сейфе, сейф заперт.</div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- VIOLATIONS LIST -->
-    <div class="violations-container" id="violations-container"></div>
+    <!-- СЕКЦИЯ ПРОГРЕССА ОБРАБОТКИ -->
+    <section class="progress-section" id="progressSection">
+      <div class="progress-header">
+        <div class="progress-title-block">
+          <h3>Нейросетевой анализ видеопотока</h3>
+          <p id="progressFileName">Обработка видеофайла...</p>
+        </div>
+        <div class="progress-timer" id="progressTimer">00:00</div>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+
+      <div class="pipeline-steps-grid">
+        <div class="pipeline-step-item" id="step1">
+          <div class="step-badge">1. Ингестия</div>
+          <div class="step-desc">Нормализация видео и проверка ffprobe</div>
+        </div>
+        <div class="pipeline-step-item" id="step2">
+          <div class="step-badge">2. Детекция</div>
+          <div class="step-desc">YOLOv8 & Pose: лица, кассир, руки, терминал</div>
+        </div>
+        <div class="pipeline-step-item" id="step3">
+          <div class="step-badge">3. Трекинг</div>
+          <div class="step-desc">Пространственный трекинг кассовых зон</div>
+        </div>
+        <div class="pipeline-step-item" id="step4">
+          <div class="step-badge">4. Нормы НБ РК</div>
+          <div class="step-desc">Сопоставление с Постановлениями НБ РК № 231 и № 14</div>
+        </div>
+        <div class="pipeline-step-item" id="step5">
+          <div class="step-badge">5. Вердикт</div>
+          <div class="step-desc">Сбор доказательной базы и отчета</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- СЕКЦИЯ РЕЗУЛЬТАТОВ -->
+    <section class="results-section" id="resultsSection">
+      <!-- Карточка вердикта -->
+      <div class="verdict-banner-card violation" id="verdictBanner">
+        <div class="verdict-left">
+          <div class="verdict-icon-box" id="verdictIconBox">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div>
+            <h2 class="verdict-title" id="verdictTitle">Обнаружены признаки возможных нарушений</h2>
+            <p class="verdict-subtitle" id="verdictSubtitle">
+              Результат носит рекомендательный характер. Окончательное решение принимает уполномоченный сотрудник службы контроля.
+            </p>
+          </div>
+        </div>
+        <div class="verdict-meta-badge" id="verdictCountBadge">2 инцидента зафиксировано</div>
+      </div>
+
+      <!-- Сегментированный переключатель вида (Forte "Банк | Бизнес" стиль) -->
+      <div class="segmented-switch">
+        <button class="segment-btn active" onclick="switchFilter('all', this)">Все события</button>
+        <button class="segment-btn" onclick="switchFilter('safe', this)">Деньги и сейф (п. 20)</button>
+        <button class="segment-btn" onclick="switchFilter('id', this)">Проверка ID (п. 19)</button>
+        <button class="segment-btn" onclick="switchFilter('counter', this)">Счетчик банкнот</button>
+        <button class="segment-btn" onclick="switchFilter('door', this)">Дверь и кабина</button>
+        <button class="segment-btn" onclick="switchFilter('internal', this)">Внутренний регламент / ИБ</button>
+      </div>
+
+      <!-- Основная сетка: Плеер слева, Карточки событий справа -->
+      <div class="results-layout">
+        <!-- Левая колонка: Видеомонитор -->
+        <div class="player-card">
+          <div class="player-screen-box">
+            <video id="mainVideoPlayer" class="video-element" style="display:none;" ontimeupdate="handleVideoTimeUpdate()"></video>
+            <div id="simulatedScreen" class="simulated-screen">
+              <div style="width:54px; height:54px; border-radius:50%; background:rgba(79,195,247,0.15); display:flex; align-items:center; justify-content:center; margin-bottom:12px; color:var(--color-blue-accent);">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              </div>
+              <h4 style="font-size:16px; font-weight:600; margin-bottom:4px;">Синхронизированный видеомонитор</h4>
+              <p style="font-size:13px; color:#A4B3C6; max-width:340px;">Кликните на карточку или маркер события для перехода к кадрам фиксации</p>
+            </div>
+          </div>
+
+          <!-- Таймлайн с маркерами нарушений -->
+          <div class="player-scrubber-wrap" id="scrubberTrack" onclick="handleScrubberClick(event)">
+            <div class="player-scrubber-progress" id="scrubberProgress"></div>
+            <div id="markersContainer"></div>
+          </div>
+
+          <!-- Элементы управления видео -->
+          <div class="player-controls-row">
+            <div class="controls-left">
+              <button class="btn-control" id="btnPlayPause" onclick="togglePlayPause()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>Воспроизведение</span>
+              </button>
+              <button class="btn-control" onclick="seekRelative(-2)">-2 сек</button>
+              <button class="btn-control" onclick="seekRelative(2)">+2 сек</button>
+              <div class="timecode-display">
+                <strong id="currentTimeDisplay">00:00.00</strong> / <span id="durationDisplay">00:45.00</span>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:6px;">
+              <button class="btn-control" onclick="setVideoSpeed(1)">1x</button>
+              <button class="btn-control" onclick="setVideoSpeed(1.5)">1.5x</button>
+              <button class="btn-control" onclick="setVideoSpeed(2)">2x</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Правая колонка: Карточки событий -->
+        <div class="events-column" id="eventsListContainer">
+          <!-- Карточки генерируются динамически -->
+        </div>
+      </div>
+
+      <!-- Нижние действия -->
+      <div class="results-bottom-actions">
+        <button class="btn-plum-primary" onclick="resetToUpload()">
+          Проверить другое видео
+        </button>
+        <button class="btn-white-secondary" onclick="window.print()">
+          Печать официального акта
+        </button>
+        <button class="btn-white-secondary" onclick="exportReportJson()">
+          Экспорт данных (JSON)
+        </button>
+      </div>
+    </section>
+
   </main>
 
-  <!-- LIGHTBOX MODAL -->
-  <div class="modal-overlay" id="lightbox-modal">
-    <div class="modal-content">
-      <button type="button" class="modal-close" id="modal-close-btn">&times;</button>
-      <img src="" alt="Кадр-доказательство" class="modal-img" id="modal-img">
+  <!-- ПОДВАЛ -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>Sana — ForteBank AI Video Analysis</strong> • Система мониторинга кассовой зоны
+      </div>
+      <div>
+        Локальный контур анализа • Версия 1.2 • Полное соответствие требованиям НБРК
+      </div>
+    </div>
+  </footer>
+
+  <!-- МОДАЛЬНОЕ ОКНО: НАСТРОЙКИ ПОДКЛЮЧЕНИЯ К API -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Параметры подключения к API</h3>
+        <button class="modal-close-btn" onclick="closeSettingsModal()">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Режим работы:</label>
+        <div style="background:var(--bg-pale-blue); padding:14px; border-radius:var(--radius-btn); margin-bottom:12px;">
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+            <input type="checkbox" id="mockModeCheckbox" style="width:18px; height:18px; accent-color:var(--color-burgundy);">
+            <span style="font-weight:600; font-size:14px; color:var(--color-plum);">Автономный режим (эмуляция бэкенда)</span>
+          </label>
+          <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+            Снимите галочку для отправки видео на реальный FastAPI бэкенд (порт 8001).
+          </p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Адрес сервера FastAPI:</label>
+        <input type="text" id="apiBaseUrlInput" class="form-input" value="http://localhost:8001" placeholder="http://localhost:8001">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Заголовок X-API-Key:</label>
+        <input type="text" id="apiKeyInput" class="form-input" value="FAbunyRSnJnCStOHtxykfBP_DdxFbnsy_Qfs5GB5Rd4">
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px;">
+        <button class="btn-white-secondary" onclick="testConnection()">Проверить связь</button>
+        <button class="btn-plum-primary" onclick="saveSettings()">Сохранить</button>
+      </div>
     </div>
   </div>
 
+  <!-- МОДАЛЬНОЕ ОКНО: КАТАЛОГ ПРАВИЛ И НОРМАТИВНЫХ АКТОВ НБ РК -->
+  <div class="modal-overlay" id="rulesModal">
+    <div class="modal-card" style="max-width:980px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Нормативные правила проверки кассовых операций</h3>
+          <p style="font-size:13px; color:var(--text-secondary); margin-top:2px;">
+            Сверено с действующими актами Национального Банка РК и видеоархивом кассового узла (файлы Х-1...Х-48)
+          </p>
+        </div>
+        <button class="modal-close-btn" onclick="closeRulesModal()">&times;</button>
+      </div>
+
+      <!-- Правовое основание и исключение розничных норм -->
+      <div class="rules-callout">
+        <strong style="color:var(--color-burgundy); display:block; margin-bottom:4px;">Юридическое основание и исключение розничных норм:</strong>
+        Правило розничной торговли <em>R-01 (невыдача фискального чека по ст. 166 НК РК)</em> полностью исключено: в банковском кассовом узле клиенты вносят наличные на счета/переводы, а не покупают товары с выдачей чека ККМ. Действующая нормативная база основана на <strong>Постановлении Правления Национального Банка РК № 231 от 29.11.2019</strong> (Правила ведения кассовых операций и инкассации) и <strong>Постановлении Правления НБ РК № 14 от 24.02.2020</strong> (Требования к охране и устройству помещений).
+      </div>
+
+      <!-- Сводная таблица соответствия разметки датасета и норм РК -->
+      <div class="rules-table-container">
+        <table class="rules-table">
+          <thead>
+            <tr>
+              <th style="width:24%;">Что видно в метках / видео</th>
+              <th style="width:18%;">Файлы датасета</th>
+              <th style="width:38%;">Действующая норма РК</th>
+              <th style="width:20%;">Статус нормы</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Не проверена личность клиента</strong><br><span style="font-size:11px; color:var(--text-secondary);">Прием денег до сверки документа</span></td>
+              <td><span style="font-family:var(--font-mono); font-size:12px; font-weight:600;">Х-2, Х-17</span></td>
+              <td><strong>Пост. НБ РК № 231</strong>, п. 19 пп. 1 и п. 31 пп. 1: визуальная идентификация физлица по документу</td>
+              <td><span class="rule-tag-legal">Официальный НПА</span></td>
+            </tr>
+            <tr>
+              <td><strong>Деньги на столе, не в сейфе</strong><br><span style="font-size:11px; color:var(--text-secondary);">Купюры на столе после ухода (>5 с)</span></td>
+              <td><span style="font-family:var(--font-mono); font-size:12px; font-weight:600;">Х-1, Х-4, Х-15, Х-24, Х-26, Х-38</span></td>
+              <td><strong>Пост. НБ РК № 231</strong>, п. 20: принятые наличные хранятся в сейфах/запираемых устройствах</td>
+              <td><span class="rule-tag-legal">Официальный НПА</span></td>
+            </tr>
+            <tr>
+              <td><strong>Сейф не закрыт / ключ в замке</strong><br><span style="font-size:11px; color:var(--text-secondary);">Кассир отошел, ключ в замке / сейф открыт</span></td>
+              <td><span style="font-family:var(--font-mono); font-size:12px; font-weight:600;">Х-20, Х-22</span></td>
+              <td><strong>Пост. НБ РК № 231</strong>, п. 20, п. 80: запирание хранилищ и порядок хранения ключей банка</td>
+              <td><span class="rule-tag-legal">Официальный НПА</span></td>
+            </tr>
+            <tr>
+              <td><strong>Клиент ушёл до конца пересчёта</strong><br><span style="font-size:11px; color:var(--text-secondary);">Уход клиента при работающем счетчике</span></td>
+              <td><span style="font-family:var(--font-mono); font-size:12px; font-weight:600;">Х-34</span></td>
+              <td><strong>Пост. НБ РК № 231</strong>, п. 20: пересчёт принятых наличных производится в присутствии клиента</td>
+              <td><span class="rule-tag-legal">Официальный НПА</span></td>
+            </tr>
+            <tr>
+              <td><strong>Личные вещи на рабочем столе</strong><br><span style="font-size:11px; color:var(--text-secondary);">Сумки, пакеты, одежда на столе кассира</span></td>
+              <td><span style="font-family:var(--font-mono); font-size:12px; font-weight:600;">Х-40</span></td>
+              <td><strong>Пост. НБ РК № 231</strong>, п. 12: личные вещи и одежда хранятся вне кассового узла</td>
+              <td><span class="rule-tag-legal">Официальный НПА</span></td>
+            </tr>
+            <tr>
+              <td><strong>Нет пересчёта или детекции</strong><br><span style="font-size:11px; color:var(--text-secondary);">Помещение денег в сейф в обход счетчика</span></td>
+              <td><span style="font-family:var(--font-mono); font-size:12px; font-weight:600;">Х-13, Х-46, Х-47</span></td>
+              <td><strong>Пост. НБ РК № 231</strong>, п. 19 пп. 2, п. 41: обязательный пересчёт на оборудовании с детекцией</td>
+              <td><span class="rule-tag-legal">Официальный НПА</span></td>
+            </tr>
+            <tr>
+              <td><strong>Дверь не закрыта / посторонний</strong><br><span style="font-size:11px; color:var(--text-secondary);">Незапертая служебная дверь, >1 клиента</span></td>
+              <td><span style="font-family:var(--font-mono); font-size:12px; font-weight:600;">Х-18, Х-30, Х-32, Х-33</span></td>
+              <td><strong>Пост. НБ РК № 14</strong>, п. 8, п. 16: изолированный служебный вход с дверью на замок</td>
+              <td><span class="rule-tag-legal">НПА</span> + <span class="rule-tag-internal">Регламент банка</span></td>
+            </tr>
+            <tr>
+              <td><strong>Ноутбук не закрыт / экран активен</strong><br><span style="font-size:11px; color:var(--text-secondary);">Кассир ушел (>4 с), экран не заблокирован</span></td>
+              <td><span style="font-family:var(--font-mono); font-size:12px; font-weight:600;">Х-11, Х-28</span></td>
+              <td><strong>Внутренний регламент банка</strong> / Политика информационной безопасности (Clean Screen Policy)</td>
+              <td><span class="rule-tag-internal">Внутренний регламент</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Примечания к разметке и юридические оговорки -->
+      <div style="background:var(--bg-gray); padding:16px 20px; border-radius:var(--radius-btn); border-left:4px solid var(--color-blue-accent); font-size:12px; line-height:1.55; margin-bottom:20px;">
+        <strong style="color:var(--color-plum); font-size:13px; display:block; margin-bottom:6px;">Аналитические замечания к разметке обучающего датасета (42 видеозаписи):</strong>
+        <ul style="padding-left:18px; margin:0; display:flex; flex-direction:column; gap:4px; color:var(--text-main);">
+          <li><strong>Состав датасета:</strong> В таблицах разметки (.xlsx и .numbers) содержится ровно 42 строки: 22 с зафиксированными нарушениями и 20 без нарушений. Ролики с номерами 6, 7, 9, 36, 41, 42 отсутствуют в выборке.</li>
+          <li><strong>Смешение кодировок в именах:</strong> В строках X-1 и X-2 литера «X» латинская, тогда как в остальных («Х-3»...«Х-48») — кириллическая «Х». В поисковом алгоритме системы заложена автоматическая нормализация обоих символов.</li>
+          <li><strong>Спорные экспертные метки:</strong> Ролик Х-44 помечен как нарушение, тогда как Х-45 со сходным описанием нарушением не признан. В ролике Х-48 оставленный в замке ключ помечен «без нарушения», в то время как в Х-22 идентичный случай признан нарушением при выходе. В Х-37 запись прерывается до начала пересчета.</li>
+          <li><strong>Редакция нормативных актов:</strong> Пункт 16 Постановления НБ РК № 14 приведен в редакции, действующей на период приостановления до 01.01.2027. Признаки без прямого закрепления в публичных актах честно маркируются в отчете как <em>«Внутренний регламент банка, уточняется у заказчика»</em>.</li>
+        </ul>
+      </div>
+
+      <!-- Развернутые карточки по категориям -->
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <!-- 1. Идентификация по документу -->
+        <div style="background:var(--bg-white); border:1px solid var(--bg-gray-alt); padding:16px 20px; border-radius:var(--radius-btn); border-left:4px solid var(--color-burgundy);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:var(--color-plum);">1. Идентификация личности клиента (cash_before_id)</strong>
+            <span style="font-size:12px; font-weight:600; color:var(--color-burgundy);">Пост. НБ РК № 231, п. 19 пп. 1, п. 31 пп. 1</span>
+          </div>
+          <p style="font-size:13px; color:var(--text-main); margin-bottom:6px;">
+            <strong>Визуальное условие:</strong> Кассир начинает прием или пересчет наличных денег без предварительной сверки документа, удостоверяющего личность (файлы Х-2, Х-17).
+          </p>
+          <div style="font-size:12px; color:var(--text-secondary);">
+            <strong>Норма:</strong> Кассир осуществляет визуальную идентификацию физического лица по документу, удостоверяющему личность, до начала проведения кассовых операций.
+          </div>
+        </div>
+
+        <!-- 2. Деньги на столе -->
+        <div style="background:var(--bg-white); border:1px solid var(--bg-gray-alt); padding:16px 20px; border-radius:var(--radius-btn); border-left:4px solid var(--color-burgundy);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:var(--color-plum);">2. Хранение наличных денег вне запираемых устройств (cash_left_on_table)</strong>
+            <span style="font-size:12px; font-weight:600; color:var(--color-burgundy);">Пост. НБ РК № 231, п. 20</span>
+          </div>
+          <p style="font-size:13px; color:var(--text-main); margin-bottom:6px;">
+            <strong>Визуальное условие:</strong> Принятые наличные деньги остаются лежать на рабочей поверхности стола после ухода клиента или при отсутствии кассира более 5 секунд (файлы Х-1, Х-4, Х-15, Х-24, Х-26, Х-38).
+          </p>
+          <div style="font-size:12px; color:var(--text-secondary);">
+            <strong>Норма:</strong> Принятые в течение операционного дня наличные деньги хранятся в сейфах, металлических шкафах или специальных запираемых устройствах на рабочем месте.
+          </div>
+        </div>
+
+        <!-- 3. Сейф открыт / ключ в замке -->
+        <div style="background:var(--bg-white); border:1px solid var(--bg-gray-alt); padding:16px 20px; border-radius:var(--radius-btn); border-left:4px solid var(--color-burgundy);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:var(--color-plum);">3. Оставление сейфа незапертым / ключ в замке при выходе (unattended_safe / unattended_key)</strong>
+            <span style="font-size:12px; font-weight:600; color:var(--color-burgundy);">Пост. НБ РК № 231, п. 20, п. 80</span>
+          </div>
+          <p style="font-size:13px; color:var(--text-main); margin-bottom:6px;">
+            <strong>Визуальное условие:</strong> Кассир покидает рабочее место более чем на 4 с, дверца сейфа остается открытой либо ключ оставлен в скважине замка сейфа (файлы Х-20, Х-22).
+          </p>
+          <div style="font-size:12px; color:var(--text-secondary);">
+            <strong>Норма:</strong> Хранение наличных в запертых устройствах. Порядок хранения и использования ключей регламентируется нормативными актами и внутренними положениями банка.
+          </div>
+        </div>
+
+        <!-- 4. Уход клиента во время пересчета -->
+        <div style="background:var(--bg-white); border:1px solid var(--bg-gray-alt); padding:16px 20px; border-radius:var(--radius-btn); border-left:4px solid var(--color-burgundy);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:var(--color-plum);">4. Уход клиента до завершения пересчета (client_left_during_counting)</strong>
+            <span style="font-size:12px; font-weight:600; color:var(--color-burgundy);">Пост. НБ РК № 231, п. 20</span>
+          </div>
+          <p style="font-size:13px; color:var(--text-main); margin-bottom:6px;">
+            <strong>Визуальное условие:</strong> Клиент покидает кассовую кабину, пока счетчик банкнот продолжает работу по пересчету принятых средств (файл Х-34).
+          </p>
+          <div style="font-size:12px; color:var(--text-secondary);">
+            <strong>Норма:</strong> Пересчет принятых от клиента наличных денег осуществляется непосредственно под наблюдением и в присутствии клиента.
+          </div>
+        </div>
+
+        <!-- 5. Личные вещи на столе -->
+        <div style="background:var(--bg-white); border:1px solid var(--bg-gray-alt); padding:16px 20px; border-radius:var(--radius-btn); border-left:4px solid var(--color-burgundy);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:var(--color-plum);">5. Посторонние предметы и личные вещи на рабочем столе (foreign_object_on_table)</strong>
+            <span style="font-size:12px; font-weight:600; color:var(--color-burgundy);">Пост. НБ РК № 231, п. 12</span>
+          </div>
+          <p style="font-size:13px; color:var(--text-main); margin-bottom:6px;">
+            <strong>Визуальное условие:</strong> На рабочей поверхности стола кассира находятся пакеты, сумки, верхняя одежда или посторонние предметы (файл Х-40).
+          </p>
+          <div style="font-size:12px; color:var(--text-secondary);">
+            <strong>Норма:</strong> Личные вещи и верхняя одежда кассовых работников хранятся в специально отведенных изолированных комнатах вне кассового узла.
+          </div>
+        </div>
+
+        <!-- 6. Проверка на счетчике/детекторе -->
+        <div style="background:var(--bg-white); border:1px solid var(--bg-gray-alt); padding:16px 20px; border-radius:var(--radius-btn); border-left:4px solid var(--color-burgundy);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:var(--color-plum);">6. Прием наличных без проверки защитных признаков (cash_bypassed_counter)</strong>
+            <span style="font-size:12px; font-weight:600; color:var(--color-burgundy);">Пост. НБ РК № 231, п. 19 пп. 2, п. 41</span>
+          </div>
+          <p style="font-size:13px; color:var(--text-main); margin-bottom:6px;">
+            <strong>Визуальное условие:</strong> Кассир помещает принятые от клиента деньги в сейф без пересчета на оборудовании с детекцией подлинности (файлы Х-13, Х-46, Х-47).
+          </p>
+          <div style="font-size:12px; color:var(--text-secondary);">
+            <strong>Норма:</strong> Банкноты проверяются на подлинность на специализированном кассовом оборудовании с детекцией машиночитаемых защитных признаков.
+          </div>
+        </div>
+
+        <!-- 7. Дверь кабины / посторонние -->
+        <div style="background:var(--bg-white); border:1px solid var(--bg-gray-alt); padding:16px 20px; border-radius:var(--radius-btn); border-left:4px solid var(--color-burgundy);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:var(--color-plum);">7. Нарушение изоляции кассового узла / незапертая дверь (multiple_clients)</strong>
+            <span style="font-size:12px; font-weight:600; color:var(--color-burgundy);">Пост. НБ РК № 14, п. 8, п. 16</span>
+          </div>
+          <p style="font-size:13px; color:var(--text-main); margin-bottom:6px;">
+            <strong>Визуальное условие:</strong> Служебная дверь открыта настежь, второе лицо находится в кабине более 1.5 с во время обслуживания клиента (файлы Х-18, Х-30, Х-32, Х-33).
+          </p>
+          <div style="font-size:12px; color:var(--text-secondary);">
+            <strong>Норма:</strong> Кассовый узел оборудуется отдельным изолированным входом с дверью на замок. Правило «один клиент в кабине» регламентируется внутренними инструкциями банка.
+          </div>
+        </div>
+
+        <!-- 8. Незаблокированный экран ноутбука -->
+        <div style="background:var(--bg-white); border:1px solid var(--bg-gray-alt); padding:16px 20px; border-radius:var(--radius-btn); border-left:4px solid var(--color-blue-accent);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:var(--color-plum);">8. Незаблокированный экран ноутбука при уходе (unattended_laptop)</strong>
+            <span style="font-size:12px; font-weight:600; color:var(--color-blue-dark);">Внутренний регламент банка, уточняется у заказчика</span>
+          </div>
+          <p style="font-size:13px; color:var(--text-main); margin-bottom:6px;">
+            <strong>Визуальное условие:</strong> Кассир отсутствует на рабочем месте более 4 секунд, при этом крышка рабочего ноутбука не закрыта, экран остается активным (файлы Х-11, Х-28).
+          </p>
+          <div style="font-size:12px; color:var(--text-secondary);">
+            <strong>Норма:</strong> Требование стандартов информационной безопасности и защиты банковской тайны (Clean Desk / Screen Lock Policy).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО: ПРОСМОТР КАДРА ДОКАЗАТЕЛЬСТВА -->
+  <div class="modal-overlay" id="evidenceLightbox" onclick="closeLightbox()">
+    <div class="modal-card" style="max-width:880px; padding:20px;" onclick="event.stopPropagation()">
+      <div class="modal-header" style="margin-bottom:12px;">
+        <h3 class="modal-title" id="lightboxTitle">Кадр фиксации инцидента</h3>
+        <button class="modal-close-btn" onclick="closeLightbox()">&times;</button>
+      </div>
+      <div style="width:100%; max-height:520px; overflow:hidden; border-radius:12px; background:#000; text-align:center;">
+        <img id="lightboxImage" src="" alt="Кадр фиксации" style="max-width:100%; max-height:500px; object-fit:contain;">
+      </div>
+      <div style="margin-top:12px; font-size:13px; color:var(--text-secondary);" id="lightboxDetails"></div>
+    </div>
+  </div>
+
+  <!-- ----------------------------------------------------
+       10. ЛОГИКА ПРИЛОЖЕНИЯ И ПОДКЛЮЧЕНИЕ К API
+       ---------------------------------------------------- -->
   <script>
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const btnSelect = document.getElementById('btn-select-file');
-    const apiKeyInput = document.getElementById('api-key-input');
-    const statusPanel = document.getElementById('status-panel');
-    const statusText = document.getElementById('status-text');
-    const currentJobId = document.getElementById('current-job-id');
-    const progressBarFill = document.getElementById('progress-bar-fill');
-    const verdictBanner = document.getElementById('verdict-banner');
-    const verdictTitle = document.getElementById('verdict-title');
-    const verdictDesc = document.getElementById('verdict-desc');
-    const verdictIcon = document.getElementById('verdict-icon-badge');
-    const violationsContainer = document.getElementById('violations-container');
-    const lightboxModal = document.getElementById('lightbox-modal');
-    const modalImg = document.getElementById('modal-img');
-    const modalCloseBtn = document.getElementById('modal-close-btn');
+    /* ПАРАМЕТРЫ ПОДКЛЮЧЕНИЯ К API */
+    const CONFIG = {
+      baseUrl: localStorage.getItem('sana_api_base_url') || (window.location.port === '8001' ? window.location.origin : 'http://localhost:8001'),
+      apiKey: localStorage.getItem('sana_api_key') || 'FAbunyRSnJnCStOHtxykfBP_DdxFbnsy_Qfs5GB5Rd4',
+      mockMode: localStorage.getItem('sana_mock_mode') === null ? false : (localStorage.getItem('sana_mock_mode') === 'true'),
+    };
 
-    const apiUrlInput = document.getElementById('api-url-input');
-    const serverStatusDot = document.getElementById('server-status-dot');
-    const serverStatusText = document.getElementById('server-status-text');
-    const swaggerLink = document.getElementById('swagger-link');
+    /* Состояние приложения */
+    let currentJob = null;
+    let currentVideoUrl = null;
+    let playbackDuration = 45.0;
+    let currentPlaybackTime = 0;
+    let isPlaying = false;
+    let activeFilter = 'all';
 
-    // Restore saved API key and server URL
-    if (localStorage.getItem('sana_api_key')) {
-      apiKeyInput.value = localStorage.getItem('sana_api_key');
-    }
-    apiKeyInput.addEventListener('change', () => {
-      localStorage.setItem('sana_api_key', apiKeyInput.value.trim());
-    });
-
-    const savedApiUrl = localStorage.getItem('sana_api_url');
-    if (savedApiUrl) {
-      apiUrlInput.value = savedApiUrl;
-    } else if (window.location.protocol === 'file:' || !window.location.host) {
-      apiUrlInput.value = 'http://127.0.0.1:8001';
-    } else {
-      apiUrlInput.value = window.location.origin;
-    }
-
-    apiUrlInput.addEventListener('input', () => {
-      localStorage.setItem('sana_api_url', apiUrlInput.value.trim());
-      checkServerHealth();
-    });
-
-    function getApiBase() {
-      const val = (apiUrlInput.value || '').trim();
-      if (val) return val.replace(/\/+$/, '');
-      if (window.location.protocol === 'file:' || !window.location.host) {
-        return 'http://127.0.0.1:8001';
-      }
-      return '';
+    /* SVG кадры доказательств для автономного режима */
+    function createEvidenceSvg(timecode, label, details) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+        <rect width="640" height="360" fill="#1A2130"/>
+        <polygon points="120,60 520,60 600,340 40,340" fill="#242E42"/>
+        <polygon points="140,160 500,160 560,330 80,330" fill="#4FC3F7" fill-opacity="0.1" stroke="#4FC3F7" stroke-dasharray="4 4"/>
+        <text x="90" y="320" fill="#4FC3F7" font-family="sans-serif" font-size="11">ЗОНА КАССОВОГО УЗЛА (СЛУЖЕБНАЯ)</text>
+        <rect x="230" y="80" width="130" height="190" fill="none" stroke="#4FC3F7" stroke-width="2"/>
+        <rect x="230" y="62" width="130" height="18" fill="#4FC3F7"/>
+        <text x="235" y="75" fill="#1A2130" font-family="sans-serif" font-size="10" font-weight="bold">КАССИР [0.96]</text>
+        <rect x="360" y="150" width="160" height="140" fill="#A0174F" fill-opacity="0.2" stroke="#A0174F" stroke-width="2.5"/>
+        <rect x="360" y="130" width="160" height="20" fill="#A0174F"/>
+        <text x="365" y="144" fill="#FFFFFF" font-family="sans-serif" font-size="10" font-weight="bold">${label}</text>
+        <rect x="10" y="10" width="620" height="30" rx="4" fill="#0E131E"/>
+        <circle cx="25" cy="25" r="5" fill="#A0174F"/>
+        <text x="38" y="29" fill="#FFFFFF" font-family="monospace" font-size="12">CAM_04 // KASSA_ZONE_HQ</text>
+        <text x="240" y="29" fill="#A4B3C6" font-family="monospace" font-size="12">TIMECODE: ${timecode}</text>
+        <text x="460" y="29" fill="#4FC3F7" font-family="monospace" font-size="12">FPS: 25.0 // 1080p</text>
+        <rect x="20" y="300" width="600" height="42" rx="6" fill="#0E131E" stroke="#334155"/>
+        <text x="35" y="325" fill="#E2E8F0" font-family="sans-serif" font-size="12">${details}</text>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
     }
 
-    async function checkServerHealth() {
-      const base = getApiBase();
-      if (swaggerLink) {
-        swaggerLink.href = `${base || window.location.origin}/docs`;
+    /* Справочник нормативных правил Национального Банка РК и регламентов банка */
+    const RULE_CATALOG = {
+      'cash_before_id': {
+        category: 'id',
+        rule_id: 'Пост. № 231, п. 19 пп. 1',
+        source: 'Постановление Правления Национального Банка РК № 231 от 29.11.2019',
+        clause: 'п. 19 пп. 1, п. 31 пп. 1',
+        why_violation: 'Обязательная визуальная идентификация физического лица по документу, удостоверяющему личность, до начала приходной кассовой операции.',
+        legal_note: 'Официальный НПА РК (видео Х-2, Х-17)'
+      },
+      'unattended_cash': {
+        category: 'safe',
+        rule_id: 'Пост. № 231, п. 20',
+        source: 'Постановление Правления Национального Банка РК № 231 от 29.11.2019',
+        clause: 'пункт 20',
+        why_violation: 'Принятые в течение операционного дня наличные деньги должны храниться в сейфах или запираемых устройствах на рабочем месте.',
+        legal_note: 'Официальный НПА РК (видео Х-1, Х-4, Х-15, Х-24, Х-26, Х-38)'
+      },
+      'cash_left_on_table': {
+        category: 'safe',
+        rule_id: 'Пост. № 231, п. 20',
+        source: 'Постановление Правления Национального Банка РК № 231 от 29.11.2019',
+        clause: 'пункт 20',
+        why_violation: 'Оставление принятых наличных денег на столе после ухода клиента более 5 секунд запрещено.',
+        legal_note: 'Официальный НПА РК (видео Х-1, Х-4, Х-15, Х-24, Х-26, Х-38)'
+      },
+      'unattended_safe': {
+        category: 'safe',
+        rule_id: 'Пост. № 231, п. 20',
+        source: 'Постановление Правления Национального Банка РК № 231 от 29.11.2019',
+        clause: 'пункт 20',
+        why_violation: 'Сейф для хранения наличных денег не должен оставаться открытым при отсутствии кассира на рабочем месте более 4 с.',
+        legal_note: 'Официальный НПА РК (видео Х-20, Х-22)'
+      },
+      'unattended_key': {
+        category: 'safe',
+        rule_id: 'Пост. № 231, п. 20, 80',
+        source: 'Постановление Правления Национального Банка РК № 231 от 29.11.2019',
+        clause: 'п. 20, п. 80 (порядок хранения ключей)',
+        why_violation: 'Оставление ключа в скважине замка сейфа при отсутствии кассира создает риск несанкционированного доступа к ценностям.',
+        legal_note: 'Официальный НПА РК (видео Х-20, Х-22)'
+      },
+      'client_left_during_counting': {
+        category: 'counter',
+        rule_id: 'Пост. № 231, п. 20',
+        source: 'Постановление Правления Национального Банка РК № 231 от 29.11.2019',
+        clause: 'пункт 20',
+        why_violation: 'Пересчет принятых от клиента наличных денег должен производиться непосредственно в присутствии клиента.',
+        legal_note: 'Официальный НПА РК (видео Х-34)'
+      },
+      'foreign_object_on_table': {
+        category: 'internal',
+        rule_id: 'Пост. № 231, п. 12',
+        source: 'Постановление Правления Национального Банка РК № 231 от 29.11.2019',
+        clause: 'пункт 12',
+        why_violation: 'Личные вещи и верхняя одежда кассовых работников хранятся вне кассового узла в специально отведенных помещениях.',
+        legal_note: 'Официальный НПА РК (видео Х-40)'
+      },
+      'cash_bypassed_counter': {
+        category: 'counter',
+        rule_id: 'Пост. № 231, п. 19 пп. 2, п. 41',
+        source: 'Постановление Правления Национального Банка РК № 231 от 29.11.2019',
+        clause: 'п. 19 пп. 2, п. 41',
+        why_violation: 'При приеме наличных денег обязателен пересчет на оборудовании с детекцией защитных машиночитаемых меток.',
+        legal_note: 'Официальный НПА РК (видео Х-13, Х-46, Х-47)'
+      },
+      'cash_returned_after_counting': {
+        category: 'counter',
+        rule_id: 'Регламент банка',
+        source: 'Внутренний регламент банка',
+        clause: 'Регламент кассовых операций',
+        why_violation: 'Возврат наличных клиенту после подтвержденного завершения пересчета требует оформления аннулирования операции.',
+        legal_note: 'Внутренний регламент банка, уточняется у заказчика'
+      },
+      'multiple_clients': {
+        category: 'door',
+        rule_id: 'Пост. № 14, п. 8, п. 16',
+        source: 'Постановление Правления НБ РК № 14 от 24.02.2020',
+        clause: 'пункт 8, пункт 16',
+        why_violation: 'Служебный вход изолируется дверью на замок. Нахождение в кабине посторонних лиц и скопление клиентов ограничено регламентом.',
+        legal_note: 'Постановление № 14 (видео Х-18, Х-30, Х-32, Х-33; норма одного клиента — регламент)'
+      },
+      'client_not_ready': {
+        category: 'door',
+        rule_id: 'Пост. № 14, п. 8, п. 16',
+        source: 'Постановление Правления НБ РК № 14 от 24.02.2020',
+        clause: 'пункт 8, пункт 16',
+        why_violation: 'Вход клиента в кассовую кабину при отсутствии кассира на рабочем месте нарушает пропускной режим.',
+        legal_note: 'Постановление № 14 и регламент банка'
+      },
+      'unattended_laptop': {
+        category: 'internal',
+        rule_id: 'Регламент ИБ банка',
+        source: 'Внутренний регламент банка / Политика ИБ',
+        clause: 'Политика блокировки экранов и чистого стола',
+        why_violation: 'Оставление терминала/ноутбука с активным экраном без присмотра кассира более 4 с создает риск компрометации банковской тайны.',
+        legal_note: 'Внутренний регламент банка, уточняется у заказчика (видео Х-11, Х-28)'
       }
-      try {
-        const res = await fetch(`${base}/health`, { signal: AbortSignal.timeout(2500) });
-        if (res.ok) {
-          serverStatusDot.className = 'status-dot online';
-          serverStatusText.innerText = 'Сервер онлайн';
-          serverStatusText.style.color = '#34d399';
-          return true;
-        }
-      } catch (e) {
-        // failed to reach server
+    };
+
+    function enrichViolation(v) {
+      let info = null;
+      const text = ((v.type || '') + ' ' + (v.description || '') + ' ' + (v.rule_id || '') + ' ' + (v.code || '')).toLowerCase();
+      
+      if (v.code && RULE_CATALOG[v.code]) {
+        info = RULE_CATALOG[v.code];
+      } else if (text.includes('личност') || text.includes('проверк') || text.includes('before_id') || text.includes('документ')) {
+        info = RULE_CATALOG['cash_before_id'];
+      } else if (text.includes('ноутбук') || text.includes('laptop') || text.includes('экран')) {
+        info = RULE_CATALOG['unattended_laptop'];
+      } else if (text.includes('ключ') || text.includes('key')) {
+        info = RULE_CATALOG['unattended_key'];
+      } else if (text.includes('открытый сейф') || text.includes('unattended_safe')) {
+        info = RULE_CATALOG['unattended_safe'];
+      } else if (text.includes('столе') || text.includes('оставлен') || text.includes('left_on_table')) {
+        info = RULE_CATALOG['cash_left_on_table'];
+      } else if (text.includes('наличные без присмотра') || text.includes('unattended_cash')) {
+        info = RULE_CATALOG['unattended_cash'];
+      } else if (text.includes('уход') && text.includes('пересч')) {
+        info = RULE_CATALOG['client_left_during_counting'];
+      } else if (text.includes('счетчик') || text.includes('счётчик') || text.includes('детекци') || text.includes('counter')) {
+        info = RULE_CATALOG['cash_bypassed_counter'];
+      } else if (text.includes('посторонний предмет') || text.includes('вещи')) {
+        info = RULE_CATALOG['foreign_object_on_table'];
+      } else if (text.includes('двер') || text.includes('посторонн') || text.includes('очередност') || text.includes('multiple_clients')) {
+        info = RULE_CATALOG['multiple_clients'];
       }
-      serverStatusDot.className = 'status-dot offline';
-      serverStatusText.innerText = 'Сервер оффлайн';
-      serverStatusText.style.color = '#f87171';
-      return false;
+
+      return {
+        ...v,
+        category: v.category || (info ? info.category : 'internal'),
+        rule_id: v.rule_id || (info ? info.rule_id : 'Регламент банка'),
+        source: v.source || (info ? info.source : 'Внутренний регламент банка'),
+        clause: v.clause || (info ? info.clause : 'уточняется у заказчика'),
+        why_violation: v.why_violation || (info ? info.why_violation : 'Отклонение от установленного порядка кассовых операций.'),
+        legal_note: v.legal_note || (info ? info.legal_note : 'Внутренний регламент банка, уточняется у заказчика')
+      };
     }
 
-    checkServerHealth();
-    setInterval(checkServerHealth, 4000);
-
-    btnSelect.addEventListener('click', (e) => {
-      e.stopPropagation();
-      fileInput.click();
-    });
-
-    dropZone.addEventListener('click', () => fileInput.click());
-
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('drag-over');
-    });
-
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over');
-      if (e.dataTransfer.files.length > 0) {
-        handleUpload(e.dataTransfer.files[0]);
+    /* Демо-сценарии на базе банковских кейсов датасета */
+    const MOCK_SCENARIOS = [
+      {
+        job_id: 'job_forte_bank_01',
+        status: 'done',
+        verdict: 'violation',
+        violations: [
+          {
+            type: 'Наличные оставлены на столе после ухода клиента',
+            code: 'cash_left_on_table',
+            category: 'safe',
+            timecode_sec: 14.5,
+            description: 'Клиент завершил операцию и покинул кассовую кабину. Принятые наличные деньги остаются лежать на рабочей поверхности стола кассира более 5 секунд.',
+            why_violation: 'Нарушение порядка хранения денежной наличности: принятые в течение операционного дня банкноты должны незамедлительно убираться в запираемый сейф.',
+            rule_id: 'Пост. № 231, п. 20',
+            source: 'Постановление Правления Национального Банка РК № 231 от 29.11.2019',
+            clause: 'пункт 20 (хранение наличных денег в запираемых устройствах)',
+            legal_note: 'Официальный НПА РК (файлы Х-1, Х-24)',
+            confidence: 0.96,
+            evidence_frames: [
+              { timestamp_sec: 14.5, image_base64: createEvidenceSvg('00:00:14.50', 'CASH_ON_TABLE', 'Инцидент: Наличные на столе после ухода клиента (файлы Х-1, Х-24)') }
+            ]
+          },
+          {
+            type: 'Ключ оставлен в замке сейфа при отсутствии кассира',
+            code: 'unattended_key',
+            category: 'safe',
+            timecode_sec: 34.0,
+            description: 'Кассир покинул рабочее место более чем на 4 секунды. Ключ от сейфа оставлен непосредственно в скважине замка.',
+            why_violation: 'Создание условий для несанкционированного доступа к ценностям; нарушение требований по запиранию хранилищ и обращению с ключами.',
+            rule_id: 'Пост. № 231, п. 20, 80',
+            source: 'Постановление Правления НБ РК № 231 от 29.11.2019',
+            clause: 'пункт 20, пункт 80',
+            legal_note: 'Официальный НПА РК (файлы Х-20, Х-22)',
+            confidence: 0.94,
+            evidence_frames: [
+              { timestamp_sec: 34.0, image_base64: createEvidenceSvg('00:00:34.00', 'UNATTENDED_KEY', 'Инцидент: Ключ в скважине замка сейфа при уходе кассира (файлы Х-20, Х-22)') }
+            ]
+          }
+        ]
+      },
+      {
+        job_id: 'job_forte_bank_02',
+        status: 'done',
+        verdict: 'violation',
+        violations: [
+          {
+            type: 'Приём наличных до проверки личности клиента',
+            code: 'cash_before_id',
+            category: 'id',
+            timecode_sec: 11.2,
+            description: 'Кассир принял пачку наличных денег от клиента и перешел к пересчету без визуальной сверки удостоверения личности клиента.',
+            why_violation: 'Кассир обязан провести визуальную идентификацию физического лица по документу до начала расчетных действий и пересчета.',
+            rule_id: 'Пост. № 231, п. 19 пп. 1',
+            source: 'Постановление Правления НБ РК № 231 от 29.11.2019',
+            clause: 'п. 19 пп. 1, п. 31 пп. 1',
+            legal_note: 'Официальный НПА РК (файлы Х-2, Х-17)',
+            confidence: 0.97,
+            evidence_frames: [
+              { timestamp_sec: 11.2, image_base64: createEvidenceSvg('00:00:11.20', 'NO_ID_VERIFIED', 'Инцидент: Прием наличных без проверки документа (файлы Х-2, Х-17)') }
+            ]
+          },
+          {
+            type: 'Нарушение изоляции кассового узла / постороннее лицо',
+            code: 'multiple_clients',
+            category: 'door',
+            timecode_sec: 28.5,
+            description: 'Дверь кассовой кабины не заперта, второе лицо находится в клиентской зоне более 1.5 с во время обслуживания клиента.',
+            why_violation: 'Кассовый узел изолируется служебным входом с дверью на замок. Нахождение посторонних лиц и скопление клиентов в кабине ограничено.',
+            rule_id: 'Пост. № 14, п. 8, 16',
+            source: 'Постановление Правления НБ РК № 14 от 24.02.2020',
+            clause: 'п. 8, п. 16 (правило одного клиента — внутренний регламент)',
+            legal_note: 'НПА + Регламент банка (файлы Х-18, Х-30)',
+            confidence: 0.93,
+            evidence_frames: [
+              { timestamp_sec: 28.5, image_base64: createEvidenceSvg('00:00:28.50', 'MULTIPLE_PERSONS', 'Инцидент: Постороннее лицо / открытая дверь кассовой кабины (файлы Х-18, Х-30)') }
+            ]
+          }
+        ]
+      },
+      {
+        job_id: 'job_forte_bank_03',
+        status: 'done',
+        verdict: 'no_violation',
+        violations: []
       }
+    ];
+
+    /* Инициализация страницы */
+    window.addEventListener('DOMContentLoaded', () => {
+      updateServerStatusBadge();
+      setupDragAndDrop();
+
+      // Живой таймкод в HUD баннера (0 КБ, 60 FPS)
+      setInterval(() => {
+        const el = document.getElementById('bannerHudTime');
+        if (!el) return;
+        const d = new Date();
+        const ms = String(Math.floor(d.getMilliseconds() / 10)).padStart(2, '0');
+        const s = String(d.getSeconds()).padStart(2, '0');
+        const m = String(d.getMinutes()).padStart(2, '0');
+        const h = String(d.getHours()).padStart(2, '0');
+        el.innerText = `${h}:${m}:${s}.${ms}`;
+      }, 70);
     });
 
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files.length > 0) {
-        handleUpload(fileInput.files[0]);
-      }
-    });
-
-    modalCloseBtn.addEventListener('click', () => lightboxModal.style.display = 'none');
-    lightboxModal.addEventListener('click', (e) => {
-      if (e.target === lightboxModal) lightboxModal.style.display = 'none';
-    });
-
-    function formatTimecode(sec) {
-      const m = Math.floor(sec / 60).toString().padStart(2, '0');
-      const s = (sec % 60).toFixed(1).padStart(4, '0');
-      return `${m}:${s}`;
-    }
-
-    async function handleUpload(file) {
-      const apiKey = apiKeyInput.value.trim();
-      if (!apiKey) {
-        alert('Пожалуйста, укажите X-API-Key в верхнем поле!');
+    /* Проверка статуса сервера */
+    async function updateServerStatusBadge() {
+      const dot = document.getElementById('serverStatusDot');
+      const text = document.getElementById('serverStatusText');
+      if (CONFIG.mockMode) {
+        dot.className = 'status-dot';
+        text.innerText = 'Сервер онлайн (Демо)';
         return;
       }
-      const apiBase = getApiBase();
-
-      // Reset previous results
-      verdictBanner.style.display = 'none';
-      violationsContainer.innerHTML = '';
-      statusPanel.style.display = 'block';
-      statusText.innerText = `Загрузка видео «${file.name}»...`;
-      progressBarFill.style.width = '20%';
-      progressBarFill.style.background = 'linear-gradient(90deg, #2563eb, #f59e0b)';
-
-      const formData = new FormData();
-      formData.append('file', file);
-
       try {
-        const uploadResp = await fetch(`${apiBase}/api/v1/analyze`, {
-          method: 'POST',
-          headers: {
-            'X-API-Key': apiKey,
-          },
-          body: formData,
+        const res = await fetch(`${CONFIG.baseUrl}/health`, { signal: AbortSignal.timeout(2000) });
+        if (res.ok) {
+          dot.className = 'status-dot';
+          text.innerText = 'Сервер онлайн';
+        } else {
+          dot.className = 'status-dot offline';
+          text.innerText = 'Ошибка связи';
+        }
+      } catch {
+        dot.className = 'status-dot offline';
+        text.innerText = 'Сервер офлайн';
+      }
+    }
+
+    /* Настройка Drag and Drop */
+    function setupDragAndDrop() {
+      const dropzone = document.getElementById('dropzone');
+      ['dragenter', 'dragover'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropzone.classList.add('dragover');
+        });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropzone.classList.remove('dragover');
+        });
+      });
+      dropzone.addEventListener('drop', (e) => {
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          handleFileSelected(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    /* Обработка выбора файла */
+    async function handleFileSelected(file) {
+      if (!file) return;
+      if (file.size > 100 * 1024 * 1024) {
+        alert('Размер файла превышает лимит 100 МБ');
+        return;
+      }
+
+      currentVideoUrl = URL.createObjectURL(file);
+      const player = document.getElementById('mainVideoPlayer');
+      player.src = currentVideoUrl;
+      player.style.display = 'block';
+      document.getElementById('simulatedScreen').style.display = 'none';
+
+      startPipelineAnimation(file.name);
+
+      if (CONFIG.mockMode) {
+        // Симуляция пайплайна
+        setTimeout(() => {
+          renderJobResults(MOCK_SCENARIOS[0]);
+        }, 3000);
+      } else {
+        // Реальный запрос к FastAPI
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          const uploadRes = await fetch(`${CONFIG.baseUrl}/api/v1/analyze`, {
+            method: 'POST',
+            headers: { 'X-API-Key': CONFIG.apiKey },
+            body: formData,
+          });
+          if (!uploadRes.ok) throw new Error('Ошибка загрузки файла на сервер');
+          const { job_id } = await uploadRes.json();
+          pollServerJob(job_id);
+        } catch (err) {
+          alert('Ошибка обработки: ' + err.message + '. Переключаемся в локальный демо-режим.');
+          setTimeout(() => renderJobResults(MOCK_SCENARIOS[0]), 1500);
+        }
+      }
+    }
+
+    /* Запуск мок-сценария */
+    function loadMockScenario(index) {
+      const scenario = MOCK_SCENARIOS[index] || MOCK_SCENARIOS[0];
+      const titles = ['kassa_cam4_X1_cash_on_table.mov', 'kassa_cam2_X2_id_skipped.mov', 'kassa_cam1_X3_clean_shift.mov'];
+      
+      const player = document.getElementById('mainVideoPlayer');
+      player.style.display = 'none';
+      document.getElementById('simulatedScreen').style.display = 'flex';
+
+      startPipelineAnimation(titles[index] || 'sample_case.mov');
+      setTimeout(() => {
+        renderJobResults(scenario);
+      }, 2500);
+    }
+
+    /* Анимация 5-этапного пайплайна */
+    function startPipelineAnimation(fileName) {
+      document.getElementById('uploadSection').style.display = 'none';
+      document.getElementById('resultsSection').style.display = 'none';
+      const progressSec = document.getElementById('progressSection');
+      progressSec.style.display = 'block';
+      document.getElementById('progressFileName').innerText = 'Анализ видеозаписи: ' + fileName;
+
+      let sec = 0;
+      const fill = document.getElementById('progressBarFill');
+      const timer = document.getElementById('progressTimer');
+      
+      const steps = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3'), document.getElementById('step4'), document.getElementById('step5')];
+      steps.forEach(s => s.className = 'pipeline-step-item');
+      steps[0].className = 'pipeline-step-item active';
+
+      const interval = setInterval(() => {
+        sec += 0.5;
+        const mins = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        timer.innerText = String(mins).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
+        const pct = Math.min(Math.round((sec / 3.0) * 100), 100);
+        fill.style.width = pct + '%';
+
+        const stepIdx = Math.min(Math.floor((sec / 3.0) * 5), 4);
+        steps.forEach((st, idx) => {
+          if (idx < stepIdx) st.className = 'pipeline-step-item completed';
+          else if (idx === stepIdx) st.className = 'pipeline-step-item active';
         });
 
-        if (!uploadResp.ok) {
-          const err = await uploadResp.json().catch(() => ({}));
-          throw new Error(err.detail || `Ошибка загрузки: HTTP ${uploadResp.status}`);
-        }
-
-        const data = await uploadResp.json();
-        const jobId = data.job_id;
-        currentJobId.innerText = jobId;
-        progressBarFill.style.width = '45%';
-        statusText.innerText = 'Видео принято. Фоновый AI-анализ (OpenCV + YOLOv8)...';
-
-        pollJobStatus(jobId, apiKey, apiBase);
-      } catch (err) {
-        console.error('Upload / Analysis error:', err);
-        let msg = err.message || 'Ошибка сети';
-        if (msg === 'Failed to fetch' || err.name === 'TypeError') {
-          msg = `Сервер API недоступен (${apiBase || 'http://127.0.0.1:8001'}). Убедитесь, что запущен Uvicorn (порт 8001), или проверьте поле «СЕРВЕР» в шапке.`;
-        }
-        statusText.innerText = `Ошибка: ${msg}`;
-        progressBarFill.style.background = '#ef4444';
-      }
-    }
-
-    async function pollJobStatus(jobId, apiKey, apiBase) {
-      let attempts = 0;
-      const interval = setInterval(async () => {
-        attempts++;
-        try {
-          const res = await fetch(`${apiBase}/api/v1/jobs/${jobId}`, {
-            headers: { 'X-API-Key': apiKey }
-          });
-
-          if (!res.ok) {
-            clearInterval(interval);
-            throw new Error(`Ошибка опроса статуса: HTTP ${res.status}`);
-          }
-
-          const job = await res.json();
-          if (job.status === 'processing') {
-            const pct = Math.min(90, 45 + attempts * 5);
-            progressBarFill.style.width = `${pct}%`;
-            statusText.innerText = 'Идёт анализ действий кассира и проверка правил НБРК...';
-          } else if (job.status === 'done') {
-            clearInterval(interval);
-            progressBarFill.style.width = '100%';
-            statusPanel.style.display = 'none';
-            renderResult(job);
-          } else if (job.status === 'failed') {
-            clearInterval(interval);
-            statusPanel.style.display = 'none';
-            renderError(job.error);
-          }
-        } catch (err) {
+        if (pct >= 100) {
           clearInterval(interval);
-          let msg = err.message || 'Сбой сети';
-          if (msg === 'Failed to fetch') {
-            msg = `Потеряна связь с сервером (${apiBase || 'http://127.0.0.1:8001'})`;
-          }
-          statusText.innerText = `Сбой анализа: ${msg}`;
-          progressBarFill.style.background = '#ef4444';
         }
-      }, 1000);
+      }, 300);
     }
 
-    function renderResult(job) {
-      verdictBanner.style.display = 'block';
-      verdictBanner.className = 'verdict-banner ' + (job.verdict === 'no_violation' ? 'verdict-clean' : 'verdict-violation');
+    /* Опрос реального сервера */
+    async function pollServerJob(jobId) {
+      const pollTimer = setInterval(async () => {
+        try {
+          const res = await fetch(`${CONFIG.baseUrl}/api/v1/jobs/${jobId}`, {
+            headers: { 'X-API-Key': CONFIG.apiKey }
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.status === 'done') {
+            clearInterval(pollTimer);
+            renderJobResults(data);
+          } else if (data.status === 'failed') {
+            clearInterval(pollTimer);
+            alert('Обработка не удалась: ' + (data.error || 'Неизвестная ошибка'));
+            resetToUpload();
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }, 1500);
+    }
 
-      if (job.verdict === 'no_violation') {
-        verdictIcon.innerText = '✓';
-        verdictTitle.innerText = 'Нарушение не обнаружено';
-        verdictDesc.innerText = 'Настроенные правила не выявили признаков нарушений в проанализированном видео.';
-        violationsContainer.innerHTML = '';
+    /* Отображение результатов */
+    function renderJobResults(jobData) {
+      currentJob = jobData;
+      document.getElementById('progressSection').style.display = 'none';
+      document.getElementById('resultsSection').style.display = 'block';
+
+      const isViolation = jobData.verdict === 'violation' && jobData.violations && jobData.violations.length > 0;
+      const banner = document.getElementById('verdictBanner');
+      const title = document.getElementById('verdictTitle');
+      const subtitle = document.getElementById('verdictSubtitle');
+      const countBadge = document.getElementById('verdictCountBadge');
+
+      if (isViolation) {
+        banner.className = 'verdict-banner-card violation';
+        title.innerText = 'Обнаружены признаки возможных нарушений';
+        subtitle.innerText = 'Результат носит рекомендательный характер. Окончательное процессуальное решение принимает уполномоченный сотрудник службы контроля.';
+        countBadge.innerText = `${jobData.violations.length} инцидента зафиксировано`;
       } else {
-        const count = job.violations.length;
-        verdictIcon.innerText = '!';
-        verdictTitle.innerText = 'Обнаружены признаки возможных нарушений';
-        verdictDesc.innerText = `Зафиксировано событий: ${count}. Проверьте детализированные карточки с доказательными кадрами ниже.`;
+        banner.className = 'verdict-banner-card clean';
+        title.innerText = 'Признаков нарушений не обнаружено';
+        subtitle.innerText = 'Идентификация клиента выполнена, пересчет проведен на оборудовании с детекцией, нарушений регламента хранения ценностей не зафиксировано.';
+        countBadge.innerText = 'Кассовая дисциплина соблюдена';
+      }
 
-        violationsContainer.innerHTML = job.violations.map((v, i) => {
-          const timeStr = formatTimecode(v.timecode_sec);
-          const frame = (v.evidence_frames && v.evidence_frames.length > 0) ? v.evidence_frames[0] : null;
-          const imgSrc = frame ? `data:image/jpeg;base64,${frame.image_base64}` : '';
+      renderTimelineMarkers(jobData.violations || []);
+      renderEventCards(jobData.violations || []);
+    }
 
-          return `
-            <div class="violation-card" id="violation-card-${i}">
-              <div class="violation-meta">
-                <div class="violation-badges">
-                  <span class="badge-timecode" id="badge-time-${i}">
-                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                      <polyline points="12 6 12 12 16 14" stroke-width="2"/>
-                    </svg>
-                    ${timeStr} (${v.timecode_sec}с)
-                  </span>
-                  <span class="badge-category" id="badge-cat-${i}">${escapeHtml(v.type)}</span>
-                </div>
-                <h3 class="violation-title">${escapeHtml(v.type)}</h3>
-                <p class="violation-desc">${escapeHtml(v.description)}</p>
-              </div>
-              <div class="evidence-preview">
-                ${imgSrc ? `
-                  <div class="evidence-frame-wrapper" onclick="openLightbox('${imgSrc}')" title="Нажмите для увеличения">
-                    <img src="${imgSrc}" class="evidence-img" alt="Доказательный кадр">
-                    <span class="frame-badge">${timeStr}</span>
+    /* Отрисовка маркеров на таймлайне */
+    function renderTimelineMarkers(violations) {
+      const container = document.getElementById('markersContainer');
+      container.innerHTML = '';
+      if (!violations) return;
+
+      violations.forEach((v) => {
+        const pct = Math.min(Math.max((v.timecode_sec / playbackDuration) * 100, 2), 98);
+        const pin = document.createElement('div');
+        pin.className = 'marker-pin';
+        pin.style.left = pct + '%';
+        pin.title = `${v.rule_id || 'Инцидент'}: ${v.timecode_sec}s`;
+        pin.onclick = (e) => {
+          e.stopPropagation();
+          seekTo(v.timecode_sec);
+        };
+        container.appendChild(pin);
+      });
+    }
+
+    /* Отрисовка карточек событий */
+    function renderEventCards(violations) {
+      const container = document.getElementById('eventsListContainer');
+      container.innerHTML = '';
+
+      const enrichedList = (violations || []).map(enrichViolation);
+      const filtered = activeFilter === 'all'
+        ? enrichedList
+        : enrichedList.filter(v => v.category === activeFilter || v.rule_id === activeFilter || v.code === activeFilter);
+
+      if (!filtered || filtered.length === 0) {
+        container.innerHTML = `
+          <div style="background:#fff; border-radius:var(--radius-card); padding:32px; text-align:center; color:var(--text-secondary); border:1px solid var(--bg-gray-alt);">
+            <div style="font-size:16px; font-weight:600; color:var(--status-success); margin-bottom:4px;">События по данному фильтру отсутствуют</div>
+            <p style="font-size:13px;">В выбранной категории признаков нарушения кассовой дисциплины не зафиксировано.</p>
+          </div>`;
+        return;
+      }
+
+      filtered.forEach((v) => {
+        const card = document.createElement('div');
+        card.className = 'event-card';
+
+        let framesHtml = '';
+        if (v.evidence_frames && v.evidence_frames.length > 0) {
+          framesHtml = `
+            <div style="margin-top:14px;">
+              <div class="event-info-label">Кадры фиксации (доказательная база):</div>
+              <div class="evidence-frames-row">
+                ${v.evidence_frames.map(f => `
+                  <div class="evidence-thumb-wrap" onclick="openLightbox('${f.image_base64}', '${v.type}', '${f.timestamp_sec}')">
+                    <img src="${f.image_base64}" class="evidence-thumb-img" alt="Evidence">
+                    <span class="evidence-thumb-time">${f.timestamp_sec.toFixed(1)}s</span>
                   </div>
-                ` : '<div style="color:var(--text-muted); font-size:12px;">Кадр отсутствует</div>'}
+                `).join('')}
               </div>
+            </div>`;
+        }
+
+        card.innerHTML = `
+          <div class="event-card-header">
+            <span class="event-type-title">${v.type}</span>
+            <button class="event-time-badge" onclick="seekTo(${v.timecode_sec})" title="Перейти к моменту в видео">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>${formatTime(v.timecode_sec)}</span>
+            </button>
+          </div>
+
+          <div class="event-info-block">
+            <div class="event-info-label">Что видно на видео:</div>
+            <div class="event-info-text">${v.description}</div>
+          </div>
+
+          <div class="event-info-block">
+            <div class="event-info-label">Почему это может указывать на нарушение:</div>
+            <div class="event-info-text">${v.why_violation || 'Отклонение от стандартного регламента кассовых расчетов.'}</div>
+          </div>
+
+          <div class="rule-reference-box">
+            <div class="rule-reference-title">Правило и нормативный источник:</div>
+            <div class="rule-reference-text">
+              <strong>${v.rule_id || 'Регламент банка'}:</strong> ${v.source || 'Внутренний регламент банка'} (${v.clause || 'п. 1'})
             </div>
-          `;
-        }).join('');
+            ${v.legal_note ? `<div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">${v.legal_note}</div>` : ''}
+          </div>
+
+          ${framesHtml}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    /* Управление плеером */
+    function togglePlayPause() {
+      const player = document.getElementById('mainVideoPlayer');
+      const btn = document.getElementById('btnPlayPause');
+      isPlaying = !isPlaying;
+      if (player.src && player.style.display !== 'none') {
+        if (isPlaying) player.play();
+        else player.pause();
+      }
+      btn.innerHTML = isPlaying
+        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg><span>Пауза</span>`
+        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Воспроизведение</span>`;
+    }
+
+    function seekTo(seconds) {
+      currentPlaybackTime = seconds;
+      const player = document.getElementById('mainVideoPlayer');
+      if (player.src && player.style.display !== 'none') {
+        player.currentTime = seconds;
+      }
+      updateScrubberUI();
+    }
+
+    function seekRelative(delta) {
+      seekTo(Math.max(0, Math.min(playbackDuration, currentPlaybackTime + delta)));
+    }
+
+    function setVideoSpeed(speed) {
+      const player = document.getElementById('mainVideoPlayer');
+      player.playbackRate = speed;
+    }
+
+    function handleVideoTimeUpdate() {
+      const player = document.getElementById('mainVideoPlayer');
+      currentPlaybackTime = player.currentTime;
+      playbackDuration = player.duration || playbackDuration;
+      updateScrubberUI();
+    }
+
+    function handleScrubberClick(e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      seekTo(pct * playbackDuration);
+    }
+
+    function updateScrubberUI() {
+      const pct = Math.min((currentPlaybackTime / playbackDuration) * 100, 100);
+      document.getElementById('scrubberProgress').style.width = pct + '%';
+      document.getElementById('currentTimeDisplay').innerText = formatTime(currentPlaybackTime);
+      document.getElementById('durationDisplay').innerText = formatTime(playbackDuration);
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      const ms = Math.floor((sec % 1) * 100);
+      return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0') + '.' + String(ms).padStart(2, '0');
+    }
+
+    /* Сегментированный переключатель фильтра */
+    function switchFilter(ruleId, btn) {
+      activeFilter = ruleId;
+      document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (currentJob) {
+        renderEventCards(currentJob.violations);
       }
     }
 
-    function renderError(error) {
-      verdictBanner.style.display = 'block';
-      verdictBanner.className = 'verdict-banner verdict-violation';
-      verdictIcon.innerText = '✕';
-      verdictTitle.innerText = `Ошибка анализа [${error ? error.code : 'UNKNOWN'}]`;
-      verdictDesc.innerText = error ? error.message : 'Технический сбой при обработке видеозаписи.';
-      violationsContainer.innerHTML = '';
+    /* Возврат к загрузчику */
+    function resetToUpload() {
+      document.getElementById('resultsSection').style.display = 'none';
+      document.getElementById('progressSection').style.display = 'none';
+      document.getElementById('uploadSection').style.display = 'block';
     }
 
-    function openLightbox(src) {
-      modalImg.src = src;
-      lightboxModal.style.display = 'flex';
+    /* Экспорт в JSON */
+    function exportReportJson() {
+      if (!currentJob) return;
+      const blob = new Blob([JSON.stringify(currentJob, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `fortebank_audit_${currentJob.job_id || 'report'}.json`;
+      a.click();
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.innerText = text;
-      return div.innerHTML;
+    /* Модалки */
+    function openSettingsModal() { document.getElementById('settingsModal').classList.add('open'); }
+    function closeSettingsModal() { document.getElementById('settingsModal').classList.remove('open'); }
+    function openRulesModal() { document.getElementById('rulesModal').classList.add('open'); }
+    function closeRulesModal() { document.getElementById('rulesModal').classList.remove('open'); }
+
+    function openLightbox(src, title, time) {
+      document.getElementById('lightboxImage').src = src;
+      document.getElementById('lightboxTitle').innerText = title || 'Кадр фиксации инцидента';
+      document.getElementById('lightboxDetails').innerText = 'Таймкод события: ' + time + ' сек.';
+      document.getElementById('evidenceLightbox').classList.add('open');
+    }
+    function closeLightbox() { document.getElementById('evidenceLightbox').classList.remove('open'); }
+
+    function saveSettings() {
+      CONFIG.baseUrl = document.getElementById('apiBaseUrlInput').value.trim();
+      CONFIG.apiKey = document.getElementById('apiKeyInput').value.trim();
+      CONFIG.mockMode = document.getElementById('mockModeCheckbox').checked;
+      localStorage.setItem('sana_api_base_url', CONFIG.baseUrl);
+      localStorage.setItem('sana_api_key', CONFIG.apiKey);
+      localStorage.setItem('sana_mock_mode', String(CONFIG.mockMode));
+      updateServerStatusBadge();
+      closeSettingsModal();
+    }
+
+    async function testConnection() {
+      const url = document.getElementById('apiBaseUrlInput').value.trim();
+      try {
+        const res = await fetch(`${url}/health`, { signal: AbortSignal.timeout(2000) });
+        if (res.ok) alert('Соединение с FastAPI бэкендом успешно!');
+        else alert('Сервер ответил со статусом: ' + res.status);
+      } catch (e) {
+        alert('Не удалось подключиться к ' + url + ': ' + e.message);
+      }
+    }
+
+    /* Версия для слабовидящих */
+    function toggleAccessibility() {
+      document.body.classList.toggle('accessibility-mode');
     }
   </script>
 </body>

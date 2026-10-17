@@ -1,0 +1,7 @@
+-r requirements.txt
+
+# Install before enabling app.services.video_analyzer:analyze_video.
+# Use one OpenCV distribution; ultralytics requires opencv-python itself.
+opencv-python>=4.10,<6
+numpy>=2,<3
+ultralytics>=8.3,<9

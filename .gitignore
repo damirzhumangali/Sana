@@ -17,4 +17,7 @@ data/
 *.jpg
 *.jpeg
 *.png
+*.xlsx
+*.numbers
+sana_front/
 
