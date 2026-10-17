@@ -81,8 +81,11 @@ class Worker:
             if process.pid is not None:
                 self._stop(process)
                 process.close()
-            output_path.unlink(missing_ok=True)
-            output_path.with_suffix(".tmp").unlink(missing_ok=True)
+            try:
+                output_path.unlink(missing_ok=True)
+                output_path.with_suffix(".tmp").unlink(missing_ok=True)
+            finally:
+                self.jobs.release_execution(job)
 
     @staticmethod
     def _stop(process) -> None:
