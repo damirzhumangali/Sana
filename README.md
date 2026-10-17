@@ -1,9 +1,13 @@
-# Sana — backend для кейса ForteBank
+# Sana — backend и frontend для кейса ForteBank
 
 FastAPI принимает видео `.mov`, сохраняет его локально и возвращает `job_id`.
 API статусов и отдельный worker реализованы. Реальную функцию OpenCV/YOLO
 нужно подключить от AI/CV-команды; по умолчанию анализатор не настроен.
 Подробный разбор задания и план: [docs/case-analysis.md](docs/case-analysis.md).
+
+React frontend находится в `frontend/`. Backend и интерфейс теперь можно получить
+одним `git clone`. Запуск у тиммейтов, безопасная локальная настройка ключа и
+проверка полного HTTP-сценария: [docs/frontend-integration.md](docs/frontend-integration.md).
 
 ## Запуск в Windows / PowerShell
 
