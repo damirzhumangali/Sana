@@ -1,11 +1,12 @@
 import logging
 import sqlite3
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
 
 from app.core.security import require_api_key
-from app.schemas import JobCreated
+from app.schemas import JobCreated, JobResponse
 from app.services.uploads import InvalidUpload, UploadTooLarge
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/api/v1", dependencies=[Depends(require_api_key)])
     status_code=status.HTTP_201_CREATED,
     tags=["jobs"],
     summary="Upload a .mov video and register a job",
-    description="Stage 1: stores the upload. Video analysis is not connected yet.",
+    description="Stores the video and queues it for a separately configured analysis worker.",
     responses={
         400: {"description": "Unsupported extension or empty file"},
         401: {"description": "Missing or invalid X-API-Key"},
@@ -43,3 +44,25 @@ def analyze(
     finally:
         file.file.close()
     return JobCreated(job_id=job_id)
+
+
+@router.get(
+    "/jobs/{job_id}",
+    response_model=JobResponse,
+    tags=["jobs"],
+    summary="Get job status and the completed analysis result",
+    responses={
+        401: {"description": "Missing or invalid X-API-Key"},
+        404: {"description": "Job not found"},
+        503: {"description": "Job storage is unavailable"},
+    },
+)
+def get_job(request: Request, job_id: UUID) -> JobResponse:
+    try:
+        job = request.app.state.jobs.get(job_id)
+    except (OSError, sqlite3.Error, ValueError) as exc:
+        logger.exception("Unable to read job %s", job_id)
+        raise HTTPException(status_code=503, detail="Job storage is unavailable") from exc
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
