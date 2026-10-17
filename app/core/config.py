@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     max_active_jobs: int = Field(default=5, ge=1)
     max_running_jobs: int = Field(default=1, ge=1)
     worker_poll_seconds: float = Field(default=1.0, gt=0, allow_inf_nan=False)
+    cleanup_enabled: bool = True
+    job_retention_seconds: int = Field(default=86400, ge=1)
+    orphan_grace_seconds: int = Field(default=3600, ge=60)
+    cleanup_interval_seconds: float = Field(default=60.0, gt=0, allow_inf_nan=False)
+    cleanup_batch_size: int = Field(default=100, ge=1, le=1000)
 
     @model_validator(mode="after")
     def validate_capacity(self):
@@ -24,6 +29,8 @@ class Settings(BaseSettings):
             raise ValueError("MAX_RUNNING_JOBS cannot exceed MAX_ACTIVE_JOBS")
         if self.max_request_mb is not None and self.max_request_mb <= self.max_upload_mb:
             raise ValueError("MAX_REQUEST_MB must exceed MAX_UPLOAD_MB to allow multipart headers")
+        if self.orphan_grace_seconds < self.total_job_timeout_seconds + 30:
+            raise ValueError("ORPHAN_GRACE_SECONDS must exceed the total job budget by 30 seconds")
         return self
 
     @field_validator("api_key")
