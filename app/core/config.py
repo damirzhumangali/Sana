@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,7 +12,16 @@ class Settings(BaseSettings):
     max_upload_mb: int = Field(default=100, ge=1)
     analyzer_callable: str | None = None
     job_timeout_seconds: int = Field(default=240, ge=1, le=300)
+    total_job_timeout_seconds: int = Field(default=300, ge=1, le=300)
+    max_active_jobs: int = Field(default=5, ge=1)
+    max_running_jobs: int = Field(default=1, ge=1)
     worker_poll_seconds: float = Field(default=1.0, gt=0, allow_inf_nan=False)
+
+    @model_validator(mode="after")
+    def validate_capacity(self):
+        if self.max_running_jobs > self.max_active_jobs:
+            raise ValueError("MAX_RUNNING_JOBS cannot exceed MAX_ACTIVE_JOBS")
+        return self
 
     @field_validator("api_key")
     @classmethod

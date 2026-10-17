@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 
 from app.core.security import require_api_key
 from app.schemas import JobCreated, JobResponse
+from app.services.jobs import QueueFull, UploadDeadlineExceeded
 from app.services.uploads import InvalidUpload, UploadTooLarge
 
 logger = logging.getLogger(__name__)
@@ -24,8 +25,9 @@ router = APIRouter(prefix="/api/v1", dependencies=[Depends(require_api_key)])
     responses={
         400: {"description": "Unsupported extension or empty file"},
         401: {"description": "Missing or invalid X-API-Key"},
+        408: {"description": "Upload exhausted the total job time budget"},
         413: {"description": "File exceeds the configured upload limit"},
-        503: {"description": "Upload storage is unavailable"},
+        503: {"description": "Queue is full or upload storage is unavailable"},
     },
 )
 def analyze(
@@ -33,7 +35,20 @@ def analyze(
     file: Annotated[UploadFile, File(description="Video file with a .mov extension")],
 ) -> JobCreated:
     try:
-        job_id = request.app.state.uploads.save(file.filename, file.file)
+        job_id = request.app.state.uploads.save(
+            file.filename, file.file, request.state.upload_started_at
+        )
+    except QueueFull as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "QUEUE_FULL", "message": "Too many active jobs; try again later"},
+            headers={"Retry-After": str(exc.retry_after_seconds)},
+        ) from exc
+    except UploadDeadlineExceeded as exc:
+        raise HTTPException(
+            status_code=408,
+            detail={"code": "UPLOAD_TIMEOUT", "message": "Upload exhausted the job time budget"},
+        ) from exc
     except InvalidUpload as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except UploadTooLarge as exc:
