@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sana — ForteBank AI Video Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(18, 24, 38, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(255, 255, 255, 0.12);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-glow: rgba(59, 130, 246, 0.3);
+      --amber: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.25);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --rose: #ef4444;
+      --rose-glow: rgba(239, 68, 68, 0.25);
+      --radius: 16px;
+      --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(37, 99, 235, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
+        linear-gradient(180deg, #090d16 0%, #05080e 100%);
+      color: var(--text);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* HEADER */
+    header {
+      backdrop-filter: blur(20px);
+      background: rgba(9, 13, 22, 0.8);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2563eb, #d97706);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      color: #fff;
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+
+    .brand-text h1 {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 60%, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .key-input-box {
+      display: flex;
+      align-items: center;
+      background: rgba(18, 24, 38, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 6px 12px;
+      gap: 8px;
+    }
+
+    .key-input-box label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--amber);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .key-input-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      width: 220px;
+    }
+
+    .api-badge {
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 6px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .api-badge:hover {
+      background: rgba(59, 130, 246, 0.25);
+    }
+
+    /* MAIN CONTAINER */
+    main {
+      flex: 1;
+      max-width: 1120px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .hero-banner {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 30px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    /* UPLOAD CARD */
+    .upload-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      border: 2px dashed var(--card-border);
+      border-radius: var(--radius);
+      padding: 48px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .upload-card:hover, .upload-card.drag-over {
+      border-color: #3b82f6;
+      background: rgba(24, 34, 56, 0.8);
+      box-shadow: 0 0 35px var(--primary-glow);
+      transform: translateY(-2px);
+    }
+
+    .upload-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 20px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px auto;
+      color: #60a5fa;
+      transition: all 0.2s;
+    }
+
+    .upload-card:hover .upload-icon {
+      transform: scale(1.08);
+      background: rgba(59, 130, 246, 0.2);
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+
+    .upload-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .upload-hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .btn-select {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      font-family: var(--font-main);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px 26px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 16px var(--primary-glow);
+      transition: all 0.2s;
+    }
+
+    .btn-select:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      transform: translateY(-1px);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    /* STATUS AND PROGRESS */
+    .status-panel {
+      display: none;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 28px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .status-label-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(59, 130, 246, 0.2);
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-text {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .job-id-pill {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      padding: 5px 12px;
+      border-radius: 6px;
+      color: var(--text-muted);
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 30%;
+      background: linear-gradient(90deg, #2563eb, #f59e0b);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      animation: pulseBar 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseBar {
+      0% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    .pipeline-steps {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    /* VERDICT BANNER */
+    .verdict-banner {
+      display: none;
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 8px;
+    }
+
+    .verdict-clean {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.03));
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      box-shadow: 0 10px 30px var(--emerald-glow);
+    }
+
+    .verdict-violation {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.14), rgba(245, 158, 11, 0.05));
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      box-shadow: 0 10px 30px var(--rose-glow);
+    }
+
+    .verdict-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .verdict-icon-badge {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+
+    .verdict-clean .verdict-icon-badge {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .verdict-violation .verdict-icon-badge {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .verdict-content h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .verdict-content p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* VIOLATIONS LIST */
+    .violations-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .violation-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      transition: all 0.2s;
+    }
+
+    .violation-card:hover {
+      border-color: var(--card-hover);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .violation-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .violation-badges {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge-timecode {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .badge-category {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .violation-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .violation-desc {
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .violation-law {
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--amber);
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .violation-law strong {
+      color: #e2e8f0;
+    }
+
+    .evidence-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .evidence-frame-wrapper {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: #000;
+      aspect-ratio: 464 / 848;
+      max-height: 260px;
+      cursor: zoom-in;
+    }
+
+    .evidence-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .evidence-frame-wrapper:hover .evidence-img {
+      transform: scale(1.03);
+    }
+
+    .frame-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    /* LIGHTBOX MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-content {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+
+    .modal-img {
+      max-width: 100%;
+      max-height: 85vh;
+      display: block;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .violation-card {
+        grid-template-columns: 1fr;
+      }
+      .evidence-frame-wrapper {
+        max-height: 320px;
+      }
+      header {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="logo-badge" id="logo-badge">F</div>
+      <div class="brand-text">
+        <h1 id="app-title">Sana — ForteBank AI Video Analysis</h1>
+        <p id="app-subtitle">Автоматизированный мониторинг кассовых операций (OpenCV + YOLOv8)</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="key-input-box" id="key-input-box">
+        <label for="api-key-input">API-КЛЮЧ</label>
+        <input type="password" id="api-key-input" value="FAbunyRSnJnCStOHtxykfBP_DdxFbnsy_Qfs5GB5Rd4" placeholder="Вставьте X-API-Key">
+      </div>
+      <a href="/docs" target="_blank" class="api-badge" id="swagger-link">Swagger /docs</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-banner">
+      <div class="hero-badge" id="hero-badge">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        Локальный AI-анализ безопасности по нормам НБРК
+      </div>
+      <h2 class="hero-title" id="main-heading">Проверка видеозаписи кассового узла</h2>
+      <p class="hero-subtitle">
+        Загрузите видеоролик (.mov) работы кассира. Система в реальном времени проведёт визуальный анализ действий, выявит потенциальные нарушения и предоставит доказательную базу.
+      </p>
+    </section>
+
+    <!-- UPLOAD ZONE -->
+    <div class="upload-card" id="drop-zone">
+      <input type="file" id="file-input" accept=".mov,.MOV">
+      <div class="upload-icon">
+        <svg width="34" height="34" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+      </div>
+      <h3 class="upload-title" id="upload-title">Перетащите .mov видео сюда или выберите файл</h3>
+      <p class="upload-hint" id="upload-hint">Поддерживается видео кассового узла до 100 МБ</p>
+      <button type="button" class="btn-select" id="btn-select-file">Выбрать видео</button>
+    </div>
+
+    <!-- STATUS PANEL -->
+    <div class="status-panel" id="status-panel">
+      <div class="status-header">
+        <div class="status-label-group">
+          <div class="spinner" id="status-spinner"></div>
+          <span class="status-text" id="status-text">Загрузка видео на сервер...</span>
+        </div>
+        <div class="job-id-pill" id="job-id-pill">JOB ID: <span id="current-job-id">...</span></div>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+      </div>
+      <div class="pipeline-steps">
+        <span id="step-upload">1. Загрузка</span>
+        <span id="step-sampling">2. OpenCV Сэмплирование</span>
+        <span id="step-yolo">3. YOLOv8 Детекция</span>
+        <span id="step-rules">4. Правила НБРК</span>
+        <span id="step-report">5. Итоговый отчёт</span>
+      </div>
+    </div>
+
+    <!-- VERDICT BANNER -->
+    <div class="verdict-banner" id="verdict-banner">
+      <div class="verdict-header">
+        <div class="verdict-icon-badge" id="verdict-icon-badge">✓</div>
+        <div class="verdict-content">
+          <h2 id="verdict-title">Нарушение не обнаружено</h2>
+          <p id="verdict-desc">Все операции в кассовом узле выполнены в строгом соответствии с регламентом безопасности.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIOLATIONS LIST -->
+    <div class="violations-container" id="violations-container"></div>
+  </main>
+
+  <!-- LIGHTBOX MODAL -->
+  <div class="modal-overlay" id="lightbox-modal">
+    <div class="modal-content">
+      <button type="button" class="modal-close" id="modal-close-btn">&times;</button>
+      <img src="" alt="Кадр-доказательство" class="modal-img" id="modal-img">
+    </div>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const btnSelect = document.getElementById('btn-select-file');
+    const apiKeyInput = document.getElementById('api-key-input');
+    const statusPanel = document.getElementById('status-panel');
+    const statusText = document.getElementById('status-text');
+    const currentJobId = document.getElementById('current-job-id');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const verdictBanner = document.getElementById('verdict-banner');
+    const verdictTitle = document.getElementById('verdict-title');
+    const verdictDesc = document.getElementById('verdict-desc');
+    const verdictIcon = document.getElementById('verdict-icon-badge');
+    const violationsContainer = document.getElementById('violations-container');
+    const lightboxModal = document.getElementById('lightbox-modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+
+    // Restore saved API key from localStorage
+    if (localStorage.getItem('sana_api_key')) {
+      apiKeyInput.value = localStorage.getItem('sana_api_key');
+    }
+    apiKeyInput.addEventListener('change', () => {
+      localStorage.setItem('sana_api_key', apiKeyInput.value.trim());
+    });
+
+    btnSelect.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length > 0) {
+        handleUpload(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        handleUpload(fileInput.files[0]);
+      }
+    });
+
+    modalCloseBtn.addEventListener('click', () => lightboxModal.style.display = 'none');
+    lightboxModal.addEventListener('click', (e) => {
+      if (e.target === lightboxModal) lightboxModal.style.display = 'none';
+    });
+
+    function formatTimecode(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toFixed(1).padStart(4, '0');
+      return `${m}:${s}`;
+    }
+
+    async function handleUpload(file) {
+      const apiKey = apiKeyInput.value.trim();
+      if (!apiKey) {
+        alert('Пожалуйста, укажите X-API-Key в верхнем поле!');
+        return;
+      }
+
+      // Reset previous results
+      verdictBanner.style.display = 'none';
+      violationsContainer.innerHTML = '';
+      statusPanel.style.display = 'block';
+      statusText.innerText = `Загрузка видео «${file.name}»...`;
+      progressBarFill.style.width = '20%';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const uploadResp = await fetch('/api/v1/analyze', {
+          method: 'POST',
+          headers: {
+            'X-API-Key': apiKey,
+          },
+          body: formData,
+        });
+
+        if (!uploadResp.ok) {
+          const err = await uploadResp.json();
+          throw new Error(err.detail || `Ошибка загрузки: HTTP ${uploadResp.status}`);
+        }
+
+        const data = await uploadResp.json();
+        const jobId = data.job_id;
+        currentJobId.innerText = jobId;
+        progressBarFill.style.width = '45%';
+        statusText.innerText = 'Видео принято. Фоновый AI-анализ (OpenCV + YOLOv8)...';
+
+        pollJobStatus(jobId, apiKey);
+      } catch (err) {
+        statusText.innerText = `Ошибка: ${err.message}`;
+        progressBarFill.style.background = '#ef4444';
+      }
+    }
+
+    async function pollJobStatus(jobId, apiKey) {
+      let attempts = 0;
+      const interval = setInterval(async () => {
+        attempts++;
+        try {
+          const res = await fetch(`/api/v1/jobs/${jobId}`, {
+            headers: { 'X-API-Key': apiKey }
+          });
+
+          if (!res.ok) {
+            clearInterval(interval);
+            throw new Error(`Ошибка опроса статуса: HTTP ${res.status}`);
+          }
+
+          const job = await res.json();
+          if (job.status === 'processing') {
+            const pct = Math.min(90, 45 + attempts * 5);
+            progressBarFill.style.width = `${pct}%`;
+            statusText.innerText = 'Идёт анализ действий кассира и проверка правил НБРК...';
+          } else if (job.status === 'done') {
+            clearInterval(interval);
+            progressBarFill.style.width = '100%';
+            statusPanel.style.display = 'none';
+            renderResult(job);
+          } else if (job.status === 'failed') {
+            clearInterval(interval);
+            statusPanel.style.display = 'none';
+            renderError(job.error);
+          }
+        } catch (err) {
+          clearInterval(interval);
+          statusText.innerText = `Сбой анализа: ${err.message}`;
+          progressBarFill.style.background = '#ef4444';
+        }
+      }, 1000);
+    }
+
+    function renderResult(job) {
+      verdictBanner.style.display = 'block';
+      verdictBanner.className = 'verdict-banner ' + (job.verdict === 'no_violation' ? 'verdict-clean' : 'verdict-violation');
+
+      if (job.verdict === 'no_violation') {
+        verdictIcon.innerText = '✓';
+        verdictTitle.innerText = 'Нарушение не обнаружено';
+        verdictDesc.innerText = 'Все операции в кассовом узле выполнены в строгом соответствии с нормами безопасности НБРК.';
+        violationsContainer.innerHTML = '';
+      } else {
+        const count = job.violations.length;
+        verdictIcon.innerText = '!';
+        verdictTitle.innerText = 'Обнаружены признаки возможных нарушений';
+        verdictDesc.innerText = `Зафиксировано событий: ${count}. Проверьте детализированные карточки с доказательными кадрами ниже.`;
+
+        violationsContainer.innerHTML = job.violations.map((v, i) => {
+          const timeStr = formatTimecode(v.timecode_sec);
+          const frame = (v.evidence_frames && v.evidence_frames.length > 0) ? v.evidence_frames[0] : null;
+          const imgSrc = frame ? `data:image/jpeg;base64,${frame.image_base64}` : '';
+
+          return `
+            <div class="violation-card" id="violation-card-${i}">
+              <div class="violation-meta">
+                <div class="violation-badges">
+                  <span class="badge-timecode" id="badge-time-${i}">
+                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                      <polyline points="12 6 12 12 16 14" stroke-width="2"/>
+                    </svg>
+                    ${timeStr} (${v.timecode_sec}с)
+                  </span>
+                  <span class="badge-category" id="badge-cat-${i}">${escapeHtml(v.type)}</span>
+                </div>
+                <h3 class="violation-title">${escapeHtml(v.type)}</h3>
+                <p class="violation-desc">${escapeHtml(v.description)}</p>
+                <div class="violation-law">
+                  <strong>Нормативная база:</strong> Проверяемое правило соответствует требованиям НБРК к кассовым операциям банков второго уровня.
+                </div>
+              </div>
+              <div class="evidence-preview">
+                ${imgSrc ? `
+                  <div class="evidence-frame-wrapper" onclick="openLightbox('${imgSrc}')" title="Нажмите для увеличения">
+                    <img src="${imgSrc}" class="evidence-img" alt="Доказательный кадр">
+                    <span class="frame-badge">${timeStr}</span>
+                  </div>
+                ` : '<div style="color:var(--text-muted); font-size:12px;">Кадр отсутствует</div>'}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function renderError(error) {
+      verdictBanner.style.display = 'block';
+      verdictBanner.className = 'verdict-banner verdict-violation';
+      verdictIcon.innerText = '✕';
+      verdictTitle.innerText = `Ошибка анализа [${error ? error.code : 'UNKNOWN'}]`;
+      verdictDesc.innerText = error ? error.message : 'Технический сбой при обработке видеозаписи.';
+      violationsContainer.innerHTML = '';
+    }
+
+    function openLightbox(src) {
+      modalImg.src = src;
+      lightboxModal.style.display = 'flex';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.innerText = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

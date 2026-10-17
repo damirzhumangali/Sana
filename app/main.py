@@ -1,11 +1,15 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 
 from app.api.routes import router
 from app.core.config import Settings
 from app.services.jobs import JobRepository
 from app.services.uploads import UploadService
+
+STATIC_INDEX = Path(__file__).parent / "static" / "index.html"
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -33,6 +37,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @application.get("/health", tags=["health"])
     def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    @application.get(
+        "/",
+        response_class=HTMLResponse,
+        tags=["ui"],
+        summary="Web User Interface for Video Analysis",
+    )
+    def index() -> HTMLResponse:
+        if STATIC_INDEX.is_file():
+            return HTMLResponse(content=STATIC_INDEX.read_text(encoding="utf-8"))
+        return HTMLResponse(content="<h1>Sana Video Analysis</h1>")
 
     return application
 

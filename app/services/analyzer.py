@@ -23,6 +23,11 @@ def load_analyzer(reference: str) -> Callable:
     return analyzer
 
 
+def analyze_video(video_path: Path) -> dict:
+    """Baseline reference analyzer: returns no_violation until real model is integrated."""
+    return {"verdict": "no_violation", "violations": []}
+
+
 def analyze_in_subprocess(reference: str, video_path: Path, output_path: Path) -> None:
     """Run in a disposable process so a timeout can actually stop inference."""
     try:
