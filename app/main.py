@@ -18,13 +18,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         jobs = JobRepository(storage_dir / "jobs.sqlite3")
         jobs.initialize()
         application.state.settings = config
+        application.state.jobs = jobs
         application.state.uploads = UploadService(uploads_dir, config.max_upload_bytes, jobs)
         yield
 
     application = FastAPI(
         title="Sana — ForteBank Video Analysis API",
-        version="0.1.0",
-        description="Stage 1: .mov upload and persistent job registration.",
+        version="0.2.0",
+        description="Local video uploads, persistent jobs and analysis results.",
         lifespan=lifespan,
     )
     application.include_router(router)

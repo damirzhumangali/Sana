@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     api_key: SecretStr
     storage_dir: Path = Path("data")
     max_upload_mb: int = Field(default=100, ge=1)
+    analyzer_callable: str | None = None
+    job_timeout_seconds: int = Field(default=240, ge=1, le=300)
+    worker_poll_seconds: float = Field(default=1.0, gt=0, allow_inf_nan=False)
 
     @field_validator("api_key")
     @classmethod
