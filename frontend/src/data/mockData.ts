@@ -15,7 +15,7 @@ function createMockFrame(timecode: string, ruleText: string, alertType: 'warning
 
     <!-- Simulated camera perspective -->
     <polygon points="120,60 520,60 600,340 40,340" fill="#1e293b" opacity="0.3"/>
-    
+
     <!-- Cashier Counter Zone -->
     <polygon points="140,160 500,160 560,330 80,330" fill="#0284c7" opacity="0.1" stroke="#0284c7" stroke-dasharray="4 4" stroke-width="1.5"/>
     <text x="90" y="320" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="bold">ZONE: CASH_REGISTER_INTERNAL</text>

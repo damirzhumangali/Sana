@@ -158,7 +158,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               backgroundImage: 'linear-gradient(rgba(6, 182, 212, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px)',
               backgroundSize: '30px 30px',
             }} />
-            
+
             <div style={{ zIndex: 2, textAlign: 'center', padding: '1rem' }}>
               <div style={{
                 width: 60,
