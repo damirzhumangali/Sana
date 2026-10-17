@@ -1,13 +1,16 @@
 import logging
 import sqlite3
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from starlette.concurrency import run_in_threadpool
+from starlette.datastructures import UploadFile
+from starlette.requests import ClientDisconnect
 
 from app.core.security import require_api_key
 from app.schemas import JobCreated, JobResponse
 from app.services.jobs import QueueFull, UploadDeadlineExceeded
+from app.services.multipart import parse_video_form
 from app.services.uploads import InvalidUpload, UploadTooLarge
 
 logger = logging.getLogger(__name__)
@@ -23,21 +26,60 @@ router = APIRouter(prefix="/api/v1", dependencies=[Depends(require_api_key)])
     summary="Upload a .mov video and register a job",
     description="Stores the video and queues it for a separately configured analysis worker.",
     responses={
-        400: {"description": "Unsupported extension or empty file"},
+        400: {"description": "Invalid multipart, request headers, extension or empty file"},
         401: {"description": "Missing or invalid X-API-Key"},
         408: {"description": "Upload exhausted the total job time budget"},
-        413: {"description": "File exceeds the configured upload limit"},
+        413: {"description": "File or total request body exceeds its configured limit"},
+        422: {"description": "Required file field is missing"},
         503: {"description": "Queue is full or upload storage is unavailable"},
     },
+    openapi_extra={
+        "requestBody": {
+            "required": True,
+            "content": {
+                "multipart/form-data": {
+                    "schema": {
+                        "type": "object",
+                        "required": ["file"],
+                        "properties": {
+                            "file": {
+                                "type": "string",
+                                "format": "binary",
+                                "description": "One .mov video file",
+                            }
+                        },
+                        "additionalProperties": False,
+                    }
+                }
+            },
+        }
+    },
 )
-def analyze(
-    request: Request,
-    file: Annotated[UploadFile, File(description="Video file with a .mov extension")],
-) -> JobCreated:
+async def analyze(request: Request) -> JobCreated:
+    form = None
     try:
-        job_id = request.app.state.uploads.save(
-            file.filename, file.file, request.state.upload_started_at
+        form = await parse_video_form(request, request.app.state.settings.max_upload_bytes)
+        file = form.get("file")
+        if not isinstance(file, UploadFile):
+            raise HTTPException(
+                status_code=422,
+                detail=[
+                    {
+                        "type": "missing",
+                        "loc": ["body", "file"],
+                        "msg": "Field required",
+                        "input": None,
+                    }
+                ],
+            )
+        job_id = await run_in_threadpool(
+            request.app.state.uploads.save,
+            file.filename,
+            file.file,
+            request.state.upload_started_at,
         )
+    except ClientDisconnect as exc:
+        raise HTTPException(status_code=400, detail="Upload connection was interrupted") from exc
     except QueueFull as exc:
         raise HTTPException(
             status_code=503,
@@ -57,7 +99,8 @@ def analyze(
         logger.exception("Unable to persist the uploaded video and job")
         raise HTTPException(status_code=503, detail="Upload storage is unavailable") from exc
     finally:
-        file.file.close()
+        if form is not None:
+            await form.close()
     return JobCreated(job_id=job_id)
 
 

@@ -7,7 +7,7 @@ from fastapi import FastAPI
 
 from app.api.routes import router
 from app.core.config import Settings
-from app.middleware import UploadTimingMiddleware
+from app.middleware import UploadProtectionMiddleware
 from app.services.jobs import JobRepository
 from app.services.uploads import UploadService
 
@@ -50,12 +50,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     application = FastAPI(
         title="Sana — ForteBank Video Analysis API",
-        version="0.3.0",
+        version="0.4.0",
         description="Local video uploads, persistent jobs and analysis results.",
         lifespan=lifespan,
     )
     application.include_router(router)
-    application.add_middleware(UploadTimingMiddleware)
+    application.add_middleware(UploadProtectionMiddleware)
 
     @application.get("/health", tags=["health"])
     def health() -> dict[str, str]:
