@@ -8,6 +8,8 @@ from starlette.datastructures import UploadFile
 from starlette.requests import ClientDisconnect
 
 from app.core.security import require_api_key
+from app.rules.engine import evaluate
+from app.rules.schemas import RuleReport, RuleRequest
 from app.schemas import JobCreated, JobResponse
 from app.services.jobs import QueueFull, UploadDeadlineExceeded
 from app.services.multipart import parse_video_form
@@ -16,6 +18,21 @@ from app.services.uploads import InvalidUpload, UploadTooLarge
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", dependencies=[Depends(require_api_key)])
+
+
+@router.post(
+    "/rules/evaluate",
+    response_model=RuleReport,
+    tags=["rules"],
+    summary="Evaluate R01-R04 on a confirmed semantic event timeline",
+    description=(
+        "Accepts temporally confirmed events and reliable observation intervals. "
+        "This endpoint does not detect actions in video. Missing coverage prevents "
+        "a no_violation verdict. Same X-API-Key as video endpoints."
+    ),
+)
+def evaluate_rules(timeline: RuleRequest) -> RuleReport:
+    return evaluate(timeline)
 
 
 @router.post(
